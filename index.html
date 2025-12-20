@@ -51,15 +51,15 @@
             z-index: 10;
         }
 
-        /* ANIMASI BARU UNTUK ICON UTAMA */
+        /* Animasi Icon Utama */
         .weather-animate {
             animation: float 4s ease-in-out infinite;
-            filter: drop-shadow(0 5px 15px rgba(0, 51, 102, 0.2));
+            filter: drop-shadow(0 8px 15px rgba(0, 51, 102, 0.15));
         }
 
         @keyframes float {
             0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(2deg); }
+            50% { transform: translateY(-12px) rotate(3deg); }
             100% { transform: translateY(0px) rotate(0deg); }
         }
 
@@ -77,7 +77,7 @@
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            animation: scroll-up 40s linear infinite;
+            animation: scroll-up 45s linear infinite;
         }
 
         @keyframes scroll-up {
@@ -124,16 +124,16 @@
         <div class="kai-main-card">
             <div class="flex items-center gap-2 mb-2">
                 <i class="fas fa-location-dot text-orange-600 animate-bounce"></i>
-                <h1 id="city-name" class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Mencari Stasiun...</h1>
+                <h1 id="city-name" class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Mencari Lokasi...</h1>
             </div>
             
             <div class="flex justify-between items-center mb-4">
                 <div>
                     <h2 id="current-temp" class="text-6xl font-black font-header tracking-tighter">--°</h2>
-                    <p id="weather-desc-main" class="text-sm font-bold text-orange-600 uppercase">Memuat Data...</p>
+                    <p id="weather-desc-main" class="text-sm font-bold text-orange-600 uppercase">Memuat...</p>
                 </div>
                 <div class="flex items-center justify-center w-24 h-24">
-                    <i id="main-icon" class="fas fa-cloud text-7xl text-slate-300 weather-animate"></i>
+                    <i id="main-icon" class="fas fa-spinner fa-spin text-5xl text-slate-300"></i>
                 </div>
             </div>
 
@@ -159,7 +159,7 @@
         </div>
 
         <h3 class="text-[10px] font-bold text-white/50 uppercase px-2 mb-2 tracking-[0.2em] flex items-center gap-2">
-            <i class="fas fa-train-subway text-[9px]"></i> Prakiraan Cuaca Lokal
+            <i class="fas fa-clock text-[9px]"></i> Prakiraan Per Jam
         </h3>
 
         <div class="scroll-wrapper">
@@ -197,27 +197,57 @@
         }
         setInterval(updateClock, 1000);
 
+        // INITIALIZE APP
         async function initApp() {
-            if (!navigator.geolocation) return;
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                const { latitude, longitude } = pos.coords;
-                try {
-                    const [geoRes, weatherRes, airRes] = await Promise.all([
-                        fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=id`),
-                        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,is_day,wind_speed_10m&hourly=temperature_2m,weather_code&timezone=auto&forecast_days=2`),
-                        fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${latitude}&longitude=${longitude}&current=european_aqi`)
-                    ]);
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    async (pos) => {
+                        fetchWeatherData(pos.coords.latitude, pos.coords.longitude);
+                    },
+                    async (error) => {
+                        console.warn("GPS Ditolak/Error, Menggunakan Lokasi IP...");
+                        fallbackToIP();
+                    },
+                    { timeout: 5000 }
+                );
+            } else {
+                fallbackToIP();
+            }
+        }
 
-                    const geoData = await geoRes.json();
-                    const weatherData = await weatherRes.json();
-                    const airData = await airRes.json();
-                    
-                    document.getElementById('city-name').innerText = `Area ${geoData.city || geoData.locality || "Sekitar Stasiun"}`;
-                    renderUI(weatherData, airData);
-                } catch (e) {
-                    document.getElementById('city-name').innerText = "Gagal Memuat Lokasi";
+        // FALLBACK: Ambil lokasi berdasarkan alamat IP
+        async function fallbackToIP() {
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
+                if(data.latitude) {
+                    document.getElementById('city-name').innerText = `Area ${data.city} (IP Mode)`;
+                    fetchWeatherData(data.latitude, data.longitude, true);
                 }
-            });
+            } catch (e) {
+                document.getElementById('city-name').innerText = "Gagal Deteksi Lokasi";
+            }
+        }
+
+        async function fetchWeatherData(lat, lon, isIP = false) {
+            try {
+                const [geoRes, weatherRes, airRes] = await Promise.all([
+                    fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=id`),
+                    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,is_day,wind_speed_10m&hourly=temperature_2m,weather_code&timezone=auto&forecast_days=2`),
+                    fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi`)
+                ]);
+
+                const geoData = await geoRes.json();
+                const weatherData = await weatherRes.json();
+                const airData = await airRes.json();
+                
+                if (!isIP) {
+                    document.getElementById('city-name').innerText = `Area ${geoData.city || geoData.locality || "Sekitar Stasiun"}`;
+                }
+                renderUI(weatherData, airData);
+            } catch (e) {
+                console.error("Fetch error:", e);
+            }
         }
 
         function renderUI(data, air) {
@@ -230,11 +260,12 @@
             const isDay = data.current.is_day === 1;
             const currentInfo = weatherMap[data.current.weather_code] || { day: "fa-cloud", night: "fa-cloud", label: "Berawan", color: "text-slate-400" };
             
-            // Update Icon dengan warna yang sesuai namun tetap dengan animasi
+            // Update Icon & Apply Animation
             const mainIcon = document.getElementById('main-icon');
-            mainIcon.className = `fas ${isDay ? currentInfo.day : (currentInfo.night || currentInfo.icon)} text-7xl weather-animate ${currentInfo.color.replace('text-', 'text-opacity-90 text-')}`;
+            mainIcon.className = `fas ${isDay ? currentInfo.day : (currentInfo.night || currentInfo.icon)} text-7xl weather-animate ${currentInfo.color}`;
             document.getElementById('weather-desc-main').innerText = currentInfo.label;
 
+            // Hourly List Logic
             const listContainer = document.getElementById('hourly-list');
             let listHTML = '';
             const sekarang = new Date();
@@ -269,12 +300,13 @@
 
             listContainer.innerHTML = listHTML + listHTML;
 
+            // Alert Control
             const alertBox = document.getElementById('weather-alert');
             if (badWeatherLog.length > 0) {
                 const uniqueTimes = [...new Set(badWeatherLog.map(b => b.jam))].slice(0, 2);
                 alertBox.classList.remove('hidden');
                 document.getElementById('alert-title').innerText = `WASPADA ${badWeatherLog[0].kondisi}`;
-                document.getElementById('alert-subtitle').innerText = `Pukul ${uniqueTimes.join(' & ')}. Mohon hati-hati di area peron.`;
+                document.getElementById('alert-subtitle').innerText = `Pukul ${uniqueTimes.join(' & ')}. Perhatikan langkah saat naik/turun kereta.`;
             } else {
                 alertBox.classList.add('hidden');
             }
