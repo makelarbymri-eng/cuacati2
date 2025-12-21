@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KAI Weather Information System</title>
+    <title>KAI Weather Information System - Realtime</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -51,7 +51,6 @@
             z-index: 10;
         }
 
-        /* Animasi Icon Utama */
         .weather-animate {
             animation: float 4s ease-in-out infinite;
             filter: drop-shadow(0 8px 15px rgba(0, 51, 102, 0.15));
@@ -63,7 +62,6 @@
             100% { transform: translateY(0px) rotate(0deg); }
         }
 
-        /* Animasi Scroll Jadwal */
         .scroll-wrapper {
             position: relative;
             flex: 1;
@@ -77,7 +75,7 @@
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            animation: scroll-up 45s linear infinite;
+            animation: scroll-up 30s linear infinite;
         }
 
         @keyframes scroll-up {
@@ -102,12 +100,6 @@
             animation: pulse-alert 2s infinite;
         }
 
-        @keyframes pulse-alert {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
-
         .font-header { font-family: 'Montserrat', sans-serif; }
     </style>
 </head>
@@ -124,7 +116,7 @@
         <div class="kai-main-card">
             <div class="flex items-center gap-2 mb-2">
                 <i class="fas fa-location-dot text-orange-600 animate-bounce"></i>
-                <h1 id="city-name" class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Mencari Lokasi...</h1>
+                <h1 id="city-name" class="text-[10px] font-bold uppercase tracking-widest text-slate-500 text-ellipsis overflow-hidden whitespace-nowrap">Mencari Lokasi...</h1>
             </div>
             
             <div class="flex justify-between items-center mb-4">
@@ -158,8 +150,9 @@
             <p id="current-date" class="text-[9px] font-bold text-slate-400 mt-4 uppercase tracking-tight text-center italic"></p>
         </div>
 
-        <h3 class="text-[10px] font-bold text-white/50 uppercase px-2 mb-2 tracking-[0.2em] flex items-center gap-2">
-            <i class="fas fa-clock text-[9px]"></i> Prakiraan Per Jam
+        <h3 class="text-[10px] font-bold text-white/50 uppercase px-2 mb-2 tracking-[0.2em] flex justify-between items-center">
+            <span><i class="fas fa-clock text-[9px] mr-1"></i> Prediksi Hari Ini</span>
+            <span class="text-[8px] opacity-60">S/D 24:00</span>
         </h3>
 
         <div class="scroll-wrapper">
@@ -170,9 +163,9 @@
             <div class="alert-kai-v2">
                 <div class="flex items-center gap-2 border-b border-white/20 pb-2 mb-2">
                     <i class="fas fa-triangle-exclamation text-white text-sm animate-pulse"></i>
-                    <h4 class="text-[10px] font-black uppercase text-white tracking-[0.2em]">Peringatan Keselamatan</h4>
+                    <h4 class="text-[10px] font-black uppercase text-white tracking-[0.2em]">Peringatan</h4>
                 </div>
-                <div id="alert-text-container" class="text-white">
+                <div class="text-white">
                     <h5 id="alert-title" class="text-lg font-black font-header leading-tight uppercase"></h5>
                     <p id="alert-subtitle" class="text-[11px] font-medium opacity-90 leading-tight"></p>
                 </div>
@@ -198,20 +191,14 @@
         setInterval(updateClock, 1000);
 
         async function initApp() {
+            const options = { enableHighAccuracy: true, timeout: 10000 };
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    async (pos) => {
-                        fetchWeatherData(pos.coords.latitude, pos.coords.longitude);
-                    },
-                    async (error) => {
-                        console.warn("GPS Ditolak, Menggunakan Lokasi IP...");
-                        fallbackToIP();
-                    },
-                    { timeout: 5000, enableHighAccuracy: true }
+                    pos => fetchWeatherData(pos.coords.latitude, pos.coords.longitude),
+                    err => { console.warn("GPS Fail, trying IP..."); fallbackToIP(); },
+                    options
                 );
-            } else {
-                fallbackToIP();
-            }
+            } else { fallbackToIP(); }
         }
 
         async function fallbackToIP() {
@@ -219,20 +206,17 @@
                 const res = await fetch('https://ipapi.co/json/');
                 const data = await res.json();
                 if(data.latitude) {
-                    // Fallback IP biasanya hanya setingkat Kota
                     document.getElementById('city-name').innerText = `${data.city} (IP Mode)`;
                     fetchWeatherData(data.latitude, data.longitude, true);
                 }
-            } catch (e) {
-                document.getElementById('city-name').innerText = "Lokasi Tidak Terdeteksi";
-            }
+            } catch (e) { document.getElementById('city-name').innerText = "Lokasi Tidak Terdeteksi"; }
         }
 
         async function fetchWeatherData(lat, lon, isIP = false) {
             try {
                 const [geoRes, weatherRes, airRes] = await Promise.all([
                     fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=id`),
-                    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,is_day,wind_speed_10m&hourly=temperature_2m,weather_code&timezone=auto&forecast_days=2`),
+                    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,is_day,wind_speed_10m&hourly=temperature_2m,weather_code&timezone=auto`),
                     fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi`)
                 ]);
 
@@ -240,21 +224,22 @@
                 const weatherData = await weatherRes.json();
                 const airData = await airRes.json();
                 
-                // Logika Penulisan Lokasi: Kec. xxx, Kota xxx
                 if (!isIP) {
-                    const kecamatan = geoData.locality || geoData.principalSubdivisionRoute || "Area Stasiun";
+                    const kecamatan = geoData.locality || "Area Stasiun";
                     const kota = geoData.city || geoData.principalSubdivision || "";
                     document.getElementById('city-name').innerText = `Kec. ${kecamatan}, ${kota}`;
                 }
 
                 renderUI(weatherData, airData);
-            } catch (e) {
-                console.error("Fetch error:", e);
-            }
+            } catch (e) { console.error("Error:", e); }
         }
 
         function renderUI(data, air) {
-            document.getElementById('current-date').innerText = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            const sekarang = new Date();
+            const akhirHari = new Date();
+            akhirHari.setHours(23, 59, 59, 999);
+
+            document.getElementById('current-date').innerText = sekarang.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
             document.getElementById('current-temp').innerText = `${Math.round(data.current.temperature_2m)}°`;
             document.getElementById('humidity-val').innerText = `${data.current.relative_humidity_2m}%`;
             document.getElementById('wind-val').innerHTML = `${Math.round(data.current.wind_speed_10m)} <span class="text-[8px]">km/h</span>`;
@@ -267,49 +252,52 @@
             mainIcon.className = `fas ${isDay ? currentInfo.day : (currentInfo.night || currentInfo.icon)} text-7xl weather-animate ${currentInfo.color}`;
             document.getElementById('weather-desc-main').innerText = currentInfo.label;
 
+            // --- FILTER JAM: HANYA SAMPAI 24.00 HARI INI ---
             const listContainer = document.getElementById('hourly-list');
             let listHTML = '';
-            const sekarang = new Date();
-            sekarang.setMinutes(0, 0, 0);
 
-            const upcoming = data.hourly.time.map((t, idx) => ({
+            const upcomingToday = data.hourly.time.map((t, idx) => ({
                 time: new Date(t),
                 temp: Math.round(data.hourly.temperature_2m[idx]),
                 code: data.hourly.weather_code[idx]
-            })).filter(item => item.time > sekarang).slice(0, 15);
+            })).filter(item => item.time > sekarang && item.time <= akhirHari);
 
-            let badWeatherLog = [];
-
-            upcoming.forEach(item => {
-                const h = item.time.getHours();
-                const itemIsDay = (h >= 6 && h < 18);
-                const info = weatherMap[item.code] || { day: "fa-cloud", night: "fa-cloud", label: "Berawan", color: "text-white", severe: false };
-                const itemIcon = itemIsDay ? (info.day || info.icon) : (info.night || info.icon);
-
-                if (info.severe) badWeatherLog.push({ jam: `${h.toString().padStart(2, '0')}.00`, kondisi: info.label });
-
-                listHTML += `
-                    <div class="hourly-item">
-                        <span class="text-xs font-bold text-orange-500 w-12">${h.toString().padStart(2, '0')}.00</span>
-                        <div class="flex flex-1 items-center gap-3">
-                            <i class="fas ${itemIcon} ${info.color} text-base"></i>
-                            <span class="text-xs font-semibold text-white/90">${info.label}</span>
-                        </div>
-                        <span class="font-bold text-sm text-right w-10 text-white">${item.temp}°</span>
-                    </div>`;
-            });
-
-            listContainer.innerHTML = listHTML + listHTML;
-
-            const alertBox = document.getElementById('weather-alert');
-            if (badWeatherLog.length > 0) {
-                const uniqueTimes = [...new Set(badWeatherLog.map(b => b.jam))].slice(0, 2);
-                alertBox.classList.remove('hidden');
-                document.getElementById('alert-title').innerText = `WASPADA ${badWeatherLog[0].kondisi}`;
-                document.getElementById('alert-subtitle').innerText = `Pukul ${uniqueTimes.join(' & ')}. Perhatikan langkah Anda.`;
+            if (upcomingToday.length === 0) {
+                listHTML = '<div class="text-center text-[10px] opacity-40 py-10 uppercase tracking-widest">Data hari ini berakhir</div>';
             } else {
-                alertBox.classList.add('hidden');
+                let badWeatherLog = [];
+                upcomingToday.forEach(item => {
+                    const h = item.time.getHours();
+                    const itemIsDay = (h >= 6 && h < 18);
+                    const info = weatherMap[item.code] || { day: "fa-cloud", night: "fa-cloud", label: "Berawan", color: "text-white", severe: false };
+                    const itemIcon = itemIsDay ? (info.day || info.icon) : (info.night || info.icon);
+
+                    if (info.severe) badWeatherLog.push({ jam: `${h.toString().padStart(2, '0')}.00`, kondisi: info.label });
+
+                    listHTML += `
+                        <div class="hourly-item">
+                            <span class="text-xs font-bold text-orange-500 w-12">${h.toString().padStart(2, '0')}.00</span>
+                            <div class="flex flex-1 items-center gap-3">
+                                <i class="fas ${itemIcon} ${info.color} text-base"></i>
+                                <span class="text-xs font-semibold text-white/90">${info.label}</span>
+                            </div>
+                            <span class="font-bold text-sm text-right w-10 text-white">${item.temp}°</span>
+                        </div>`;
+                });
+
+                // Tampilkan Alert jika cuaca buruk dalam sisa hari ini
+                const alertBox = document.getElementById('weather-alert');
+                if (badWeatherLog.length > 0) {
+                    alertBox.classList.remove('hidden');
+                    document.getElementById('alert-title').innerText = `WASPADA ${badWeatherLog[0].kondisi}`;
+                    document.getElementById('alert-subtitle').innerText = `Prediksi sisa hari ini pukul ${badWeatherLog[0].jam}. Mohon berhati-hati.`;
+                } else { alertBox.classList.add('hidden'); }
             }
+
+            // Duplikasi untuk animasi infinite scroll hanya jika data cukup banyak
+            listContainer.innerHTML = upcomingToday.length > 5 ? listHTML + listHTML : listHTML;
+            // Stop animasi jika data sedikit
+            listContainer.style.animation = upcomingToday.length > 5 ? "scroll-up 30s linear infinite" : "none";
         }
 
         initApp();
