@@ -75,7 +75,7 @@
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            animation: scroll-up 30s linear infinite;
+            /* Animasi akan dikontrol via JavaScript */
         }
 
         @keyframes scroll-up {
@@ -151,8 +151,8 @@
         </div>
 
         <h3 class="text-[10px] font-bold text-white/50 uppercase px-2 mb-2 tracking-[0.2em] flex justify-between items-center">
-            <span><i class="fas fa-clock text-[9px] mr-1"></i> Prediksi Hari Ini</span>
-            <span class="text-[8px] opacity-60">S/D 24:00</span>
+            <span><i class="fas fa-clock text-[9px] mr-1"></i> Prediksi Sisa Hari Ini</span>
+            <span id="label-limit" class="text-[8px] opacity-60 italic">Sampai 24:00</span>
         </h3>
 
         <div class="scroll-wrapper">
@@ -195,7 +195,7 @@
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     pos => fetchWeatherData(pos.coords.latitude, pos.coords.longitude),
-                    err => { console.warn("GPS Fail, trying IP..."); fallbackToIP(); },
+                    err => fallbackToIP(),
                     options
                 );
             } else { fallbackToIP(); }
@@ -252,10 +252,10 @@
             mainIcon.className = `fas ${isDay ? currentInfo.day : (currentInfo.night || currentInfo.icon)} text-7xl weather-animate ${currentInfo.color}`;
             document.getElementById('weather-desc-main').innerText = currentInfo.label;
 
-            // --- FILTER JAM: HANYA SAMPAI 24.00 HARI INI ---
             const listContainer = document.getElementById('hourly-list');
             let listHTML = '';
 
+            // Filter data yang hanya milik hari ini
             const upcomingToday = data.hourly.time.map((t, idx) => ({
                 time: new Date(t),
                 temp: Math.round(data.hourly.temperature_2m[idx]),
@@ -263,7 +263,15 @@
             })).filter(item => item.time > sekarang && item.time <= akhirHari);
 
             if (upcomingToday.length === 0) {
-                listHTML = '<div class="text-center text-[10px] opacity-40 py-10 uppercase tracking-widest">Data hari ini berakhir</div>';
+                // Jika sudah pukul 24.00 atau data habis
+                listContainer.style.animation = "none";
+                listContainer.style.transform = "translateY(0)";
+                listContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-10 opacity-30">
+                        <i class="fas fa-moon text-3xl mb-2"></i>
+                        <span class="text-[10px] uppercase tracking-widest font-bold">Data Hari Ini Berakhir</span>
+                    </div>`;
+                document.getElementById('label-limit').innerText = "Besok Mulai 00:00";
             } else {
                 let badWeatherLog = [];
                 upcomingToday.forEach(item => {
@@ -285,19 +293,24 @@
                         </div>`;
                 });
 
-                // Tampilkan Alert jika cuaca buruk dalam sisa hari ini
+                // Terapkan animasi hanya jika sisa jam cukup banyak (min 6 jam)
+                if (upcomingToday.length > 6) {
+                    listContainer.innerHTML = listHTML + listHTML; // Gandakan untuk infinite
+                    listContainer.style.animation = "scroll-up 25s linear infinite";
+                } else {
+                    listContainer.innerHTML = listHTML; // Tanpa duplikasi
+                    listContainer.style.animation = "none";
+                    listContainer.style.transform = "translateY(0)";
+                }
+
+                // Alert Control
                 const alertBox = document.getElementById('weather-alert');
                 if (badWeatherLog.length > 0) {
                     alertBox.classList.remove('hidden');
                     document.getElementById('alert-title').innerText = `WASPADA ${badWeatherLog[0].kondisi}`;
-                    document.getElementById('alert-subtitle').innerText = `Prediksi sisa hari ini pukul ${badWeatherLog[0].jam}. Mohon berhati-hati.`;
+                    document.getElementById('alert-subtitle').innerText = `Terpantau pukul ${badWeatherLog[0].jam}. Siapkan payung/jas hujan.`;
                 } else { alertBox.classList.add('hidden'); }
             }
-
-            // Duplikasi untuk animasi infinite scroll hanya jika data cukup banyak
-            listContainer.innerHTML = upcomingToday.length > 5 ? listHTML + listHTML : listHTML;
-            // Stop animasi jika data sedikit
-            listContainer.style.animation = upcomingToday.length > 5 ? "scroll-up 30s linear infinite" : "none";
         }
 
         initApp();
