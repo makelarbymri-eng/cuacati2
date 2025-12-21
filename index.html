@@ -197,7 +197,6 @@
         }
         setInterval(updateClock, 1000);
 
-        // INITIALIZE APP
         async function initApp() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -205,27 +204,27 @@
                         fetchWeatherData(pos.coords.latitude, pos.coords.longitude);
                     },
                     async (error) => {
-                        console.warn("GPS Ditolak/Error, Menggunakan Lokasi IP...");
+                        console.warn("GPS Ditolak, Menggunakan Lokasi IP...");
                         fallbackToIP();
                     },
-                    { timeout: 5000 }
+                    { timeout: 5000, enableHighAccuracy: true }
                 );
             } else {
                 fallbackToIP();
             }
         }
 
-        // FALLBACK: Ambil lokasi berdasarkan alamat IP
         async function fallbackToIP() {
             try {
                 const res = await fetch('https://ipapi.co/json/');
                 const data = await res.json();
                 if(data.latitude) {
-                    document.getElementById('city-name').innerText = `Area ${data.city} (IP Mode)`;
+                    // Fallback IP biasanya hanya setingkat Kota
+                    document.getElementById('city-name').innerText = `${data.city} (IP Mode)`;
                     fetchWeatherData(data.latitude, data.longitude, true);
                 }
             } catch (e) {
-                document.getElementById('city-name').innerText = "Gagal Deteksi Lokasi";
+                document.getElementById('city-name').innerText = "Lokasi Tidak Terdeteksi";
             }
         }
 
@@ -241,9 +240,13 @@
                 const weatherData = await weatherRes.json();
                 const airData = await airRes.json();
                 
+                // Logika Penulisan Lokasi: Kec. xxx, Kota xxx
                 if (!isIP) {
-                    document.getElementById('city-name').innerText = `Area ${geoData.city || geoData.locality || "Sekitar Stasiun"}`;
+                    const kecamatan = geoData.locality || geoData.principalSubdivisionRoute || "Area Stasiun";
+                    const kota = geoData.city || geoData.principalSubdivision || "";
+                    document.getElementById('city-name').innerText = `Kec. ${kecamatan}, ${kota}`;
                 }
+
                 renderUI(weatherData, airData);
             } catch (e) {
                 console.error("Fetch error:", e);
@@ -260,12 +263,10 @@
             const isDay = data.current.is_day === 1;
             const currentInfo = weatherMap[data.current.weather_code] || { day: "fa-cloud", night: "fa-cloud", label: "Berawan", color: "text-slate-400" };
             
-            // Update Icon & Apply Animation
             const mainIcon = document.getElementById('main-icon');
             mainIcon.className = `fas ${isDay ? currentInfo.day : (currentInfo.night || currentInfo.icon)} text-7xl weather-animate ${currentInfo.color}`;
             document.getElementById('weather-desc-main').innerText = currentInfo.label;
 
-            // Hourly List Logic
             const listContainer = document.getElementById('hourly-list');
             let listHTML = '';
             const sekarang = new Date();
@@ -300,13 +301,12 @@
 
             listContainer.innerHTML = listHTML + listHTML;
 
-            // Alert Control
             const alertBox = document.getElementById('weather-alert');
             if (badWeatherLog.length > 0) {
                 const uniqueTimes = [...new Set(badWeatherLog.map(b => b.jam))].slice(0, 2);
                 alertBox.classList.remove('hidden');
                 document.getElementById('alert-title').innerText = `WASPADA ${badWeatherLog[0].kondisi}`;
-                document.getElementById('alert-subtitle').innerText = `Pukul ${uniqueTimes.join(' & ')}. Perhatikan langkah saat naik/turun kereta.`;
+                document.getElementById('alert-subtitle').innerText = `Pukul ${uniqueTimes.join(' & ')}. Perhatikan langkah Anda.`;
             } else {
                 alertBox.classList.add('hidden');
             }
