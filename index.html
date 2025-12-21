@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KAI Weather - High Accuracy Mode</title>
+    <title>KAI Weather - Lokasi Indonesia & Slow Scroll</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -25,7 +25,7 @@
             z-index: 10; position: relative; overflow: hidden;
         }
 
-        /* Weather Atmosphere Overlays */
+        /* Weather Effects */
         #weather-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
         .rain-drop { position: absolute; background: rgba(0, 51, 102, 0.4); width: 2px; height: 12px; top: -20px; animation: fall linear infinite; }
         @keyframes fall { to { transform: translateY(250px); } }
@@ -38,8 +38,14 @@
         .live-badge { background: var(--kai-red); color: white; padding: 2px 8px; border-radius: 4px; font-size: 8px; font-weight: 900; animation: blink 1.5s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
+        /* Slow Scrolling Animation */
         .scroll-wrapper { position: relative; flex: 1; overflow: hidden; mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); }
-        .scroll-content { display: flex; flex-direction: column; gap: 0.5rem; animation: scroll-up 25s linear infinite; }
+        .scroll-content { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 0.5rem; 
+            animation: scroll-up 45s linear infinite; /* Diperlambat dari 25s ke 45s */
+        }
         @keyframes scroll-up { from { transform: translateY(0); } to { transform: translateY(-50%); } }
 
         .hourly-item { display: flex; align-items: center; gap: 1rem; padding: 0.85rem; background: rgba(255, 255, 255, 0.08); border-radius: 0.75rem; }
@@ -63,8 +69,8 @@
                     <div class="flex items-center gap-3">
                         <i class="fas fa-location-dot text-orange-600 text-xl"></i>
                         <div class="flex flex-col">
-                            <h1 id="city-name" class="text-xl font-black font-header uppercase tracking-tight text-slate-800 leading-none">Mencari Lokasi...</h1>
-                            <h2 id="kelurahan-name" class="text-[9px] font-bold uppercase tracking-widest text-slate-400 mt-1 italic">Mendeteksi Area...</h2>
+                            <h1 id="city-name" class="text-xl font-black font-header uppercase tracking-tight text-slate-800 leading-none">Mencari Kota...</h1>
+                            <h2 id="kelurahan-name" class="text-[9px] font-bold uppercase tracking-widest text-slate-400 mt-1 italic">Mendeteksi Wilayah...</h2>
                         </div>
                     </div>
                     <span class="live-badge">REALTIME</span>
@@ -84,7 +90,7 @@
 
                 <div class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100 text-center">
                     <div>
-                        <p class="text-[9px] uppercase font-bold text-slate-400">Kelembaban</p>
+                        <p class="text-[9px] uppercase font-bold text-slate-400">Lembab</p>
                         <p id="humidity-val" class="text-sm font-black text-slate-700 font-header">--%</p>
                     </div>
                     <div>
@@ -135,16 +141,20 @@
 
         async function fetchWeatherData(lat, lon) {
             try {
-                // Menggunakan 'models=best_match' untuk akurasi tertinggi mendekati data lokal BMKG
                 const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m&hourly=temperature_2m,weather_code&timezone=auto&models=best_match`);
-                const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                // Memaksa parameter Bahasa Indonesia pada pencarian lokasi
+                const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=id`);
                 
                 const data = await weatherRes.json();
                 const geo = await geoRes.json();
 
                 const addr = geo.address;
-                document.getElementById('city-name').innerText = addr.city || addr.town || addr.city_district || "Kota";
-                document.getElementById('kelurahan-name').innerText = `Kel. ${addr.village || addr.suburb || addr.neighbourhood || "Area Stasiun"}`;
+                // Logika Penamaan Kota/Kabupaten dalam Bahasa Indonesia
+                const cityName = addr.city || addr.town || addr.city_district || addr.county || "Kota Tidak Diketahui";
+                const areaName = addr.village || addr.suburb || addr.neighbourhood || addr.municipality || "Area Stasiun";
+
+                document.getElementById('city-name').innerText = cityName;
+                document.getElementById('kelurahan-name').innerText = `Kel./Wil. ${areaName}`;
                 
                 renderUI(data);
             } catch (e) { console.error("Error Fetching:", e); }
@@ -165,7 +175,6 @@
             
             setAtmosphere(info.type);
 
-            // Prediksi Sisa Hari (Looping)
             let hourlyHTML = '';
             let badWeather = null;
             const now = new Date();
@@ -189,6 +198,7 @@
                 }
             });
 
+            // Memberikan loop konten yang cukup agar scrolling terlihat mulus
             document.getElementById('hourly-list').innerHTML = hourlyHTML.repeat(4);
             
             const alertBox = document.getElementById('weather-alert');
