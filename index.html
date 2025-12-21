@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KAI Weather Information System - Premium</title>
+    <title>KAI Weather - Dynamic Colors</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -11,7 +11,6 @@
         :root {
             --kai-blue: #003366;
             --kai-orange: #FF6600;
-            --kai-red: #d32f2f;
         }
 
         body {
@@ -51,102 +50,55 @@
             overflow: hidden;
         }
 
-        /* --- Efek Gradasi Ikon --- */
+        /* --- GRADASI IKON BERWARNA --- */
         .weather-gradient-sun {
-            background: linear-gradient(to bottom right, #FFD700, #FF8C00);
+            background: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 6px rgba(255, 140, 0, 0.2));
         }
         .weather-gradient-rain {
-            background: linear-gradient(to bottom right, #4facfe, #00f2fe);
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 6px rgba(0, 242, 254, 0.2));
         }
         .weather-gradient-cloud {
-            background: linear-gradient(to bottom right, #bdc3c7, #2c3e50);
+            background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 6px rgba(44, 62, 80, 0.2));
         }
         .weather-gradient-storm {
-            background: linear-gradient(to bottom right, #f83600, #f9d423);
+            background: linear-gradient(135deg, #f83600 0%, #f9d423 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 10px rgba(248, 54, 0, 0.4));
         }
 
-        /* --- Animasi Partikel --- */
-        .particle-container {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-        .rain-drop {
-            position: absolute;
-            background-color: rgba(174, 194, 224, 0.4);
-            width: 2px;
-            height: 15px;
-            top: -20px;
-            animation: fall linear infinite;
-        }
-        .thunder-flash {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: white;
-            opacity: 0;
-            z-index: 2;
-            pointer-events: none;
-        }
-        @keyframes fall { to { transform: translateY(300px); } }
-        @keyframes flash {
-            0%, 90%, 100% { opacity: 0; }
-            92% { opacity: 0.3; }
-            94% { opacity: 0; }
-            96% { opacity: 0.3; }
-        }
+        /* --- EFEK PARTIKEL --- */
+        .particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        .rain-drop { position: absolute; background-color: rgba(174, 194, 224, 0.4); width: 2px; height: 15px; top: -20px; animation: fall linear infinite; }
+        .thunder-flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 2; pointer-events: none; }
+        @keyframes fall { to { transform: translateY(350px); } }
+        @keyframes flash { 0%, 90%, 100% { opacity: 0; } 92% { opacity: 0.3; } 94% { opacity: 0; } 96% { opacity: 0.3; } }
         .animate-flash { animation: flash 4s infinite; }
 
-        /* Animasi Floating */
         .weather-animate { animation: float 4s ease-in-out infinite; }
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(3deg); }
-        }
+        @keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-10px) rotate(3deg); } }
 
-        /* Scroll Jadwal */
-        .scroll-wrapper {
-            position: relative;
-            flex: 1;
-            overflow: hidden;
-            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-            -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-        }
-        .scroll-content {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            animation: scroll-up 40s linear infinite;
-        }
+        .scroll-wrapper { position: relative; flex: 1; overflow: hidden; mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); }
+        .scroll-content { display: flex; flex-direction: column; gap: 0.5rem; animation: scroll-up 45s linear infinite; }
         @keyframes scroll-up { 0% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
 
-        .hourly-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.85rem;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 0.75rem;
-        }
-
-        .font-header { font-family: 'Montserrat', sans-serif; }
+        .hourly-item { display: flex; align-items: center; gap: 1rem; padding: 0.85rem; background: rgba(255, 255, 255, 0.08); border-radius: 0.75rem; }
     </style>
 </head>
 <body>
 
     <div class="app-container">
         <div class="flex justify-between items-center mb-4 px-2">
-            <div class="font-header font-black text-2xl italic tracking-tighter text-white">
-                KAI<span style="color: var(--kai-orange);">.</span>
-            </div>
+            <div class="font-header font-black text-2xl italic tracking-tighter text-white">KAI<span class="text-orange-500">.</span></div>
             <div id="digital-clock" class="font-mono font-bold text-lg text-orange-400">00:00:00</div>
         </div>
 
@@ -187,12 +139,11 @@
                         <p id="aqi-val" class="text-sm font-black text-slate-700">--</p>
                     </div>
                 </div>
-                <p id="current-date" class="text-[9px] font-bold text-slate-400 mt-4 uppercase tracking-tight text-center italic"></p>
             </div>
         </div>
 
-        <h3 class="text-[10px] font-bold text-white/50 uppercase px-2 mb-2 tracking-[0.2em] flex items-center gap-2">
-            <i class="fas fa-clock text-[9px]"></i> Prakiraan Per Jam
+        <h3 class="text-[10px] font-bold text-white/50 uppercase px-2 mb-2 tracking-widest flex items-center gap-2">
+            <i class="fas fa-clock"></i> Prakiraan Per Jam
         </h3>
 
         <div class="scroll-wrapper">
@@ -200,22 +151,19 @@
         </div>
 
         <div id="weather-alert" class="hidden mt-4 bg-red-600 rounded-xl p-3 border-l-4 border-orange-500 animate-pulse">
-            <div class="flex items-center gap-2 mb-1">
-                <i class="fas fa-triangle-exclamation text-white text-xs"></i>
-                <h4 class="text-[10px] font-black uppercase text-white tracking-widest">Peringatan</h4>
-            </div>
-            <p id="alert-title" class="text-white font-bold text-sm leading-tight"></p>
+            <p id="alert-title" class="text-white font-bold text-sm"></p>
         </div>
     </div>
 
     <script>
+        // Map Cuaca dengan Warna Gradasi Dinamis
         const weatherMap = {
-            0: { day: "fa-sun", night: "fa-moon", label: "Cerah", color: "weather-gradient-sun", severe: false },
-            1: { day: "fa-cloud-sun", night: "fa-cloud-moon", label: "Cerah Berawan", color: "weather-gradient-sun", severe: false },
-            2: { day: "fa-cloud-sun", night: "fa-cloud-moon", label: "Berawan", color: "weather-gradient-cloud", severe: false },
-            3: { day: "fa-cloud", night: "fa-cloud", label: "Mendung", color: "weather-gradient-cloud", severe: false },
-            45: { label: "Kabut", icon: "fa-smog", color: "weather-gradient-cloud", severe: false },
-            61: { day: "fa-cloud-rain", night: "fa-cloud-moon-rain", label: "Hujan Ringan", color: "weather-gradient-rain", severe: false },
+            0: { day: "fa-sun", night: "fa-moon", label: "Cerah", color: "weather-gradient-sun" },
+            1: { day: "fa-cloud-sun", night: "fa-cloud-moon", label: "Cerah Berawan", color: "weather-gradient-sun" },
+            2: { day: "fa-cloud-sun", night: "fa-cloud-moon", label: "Berawan", color: "weather-gradient-cloud" },
+            3: { day: "fa-cloud", night: "fa-cloud", label: "Mendung", color: "weather-gradient-cloud" },
+            45: { label: "Kabut", icon: "fa-smog", color: "weather-gradient-cloud" },
+            61: { day: "fa-cloud-rain", night: "fa-cloud-moon-rain", label: "Hujan Ringan", color: "weather-gradient-rain" },
             63: { day: "fa-cloud-showers-heavy", night: "fa-cloud-showers-heavy", label: "Hujan Lebat", color: "weather-gradient-rain", severe: true },
             95: { day: "fa-bolt", night: "fa-bolt", label: "Badai Petir", color: "weather-gradient-storm", severe: true }
         };
@@ -225,14 +173,13 @@
         }
         setInterval(updateClock, 1000);
 
-        // Efek Visual (Hujan & Petir)
         function updateEffects(code) {
             const overlay = document.getElementById('particle-overlay');
             const thunder = document.getElementById('thunder-overlay');
             overlay.innerHTML = '';
             thunder.classList.remove('animate-flash');
 
-            if (code >= 61) { // Kode Hujan
+            if (code >= 61) {
                 for (let i = 0; i < 30; i++) {
                     const drop = document.createElement('div');
                     drop.className = 'rain-drop';
@@ -242,7 +189,7 @@
                     overlay.appendChild(drop);
                 }
             }
-            if (code === 95) thunder.classList.add('animate-flash'); // Kode Badai
+            if (code === 95) thunder.classList.add('animate-flash');
         }
 
         async function initApp() {
@@ -275,14 +222,13 @@
                 const weatherData = await weatherRes.json();
                 const airData = await airRes.json();
                 
-                document.getElementById('city-name').innerText = isIP ? `Area ${ipCity} (IP)` : `Area ${geoData.city || geoData.locality || "Stasiun"}`;
+                document.getElementById('city-name').innerText = isIP ? `Area ${ipCity}` : `Area ${geoData.city || geoData.locality}`;
                 renderUI(weatherData, airData);
             } catch (e) { console.error(e); }
         }
 
         function renderUI(data, air) {
             const current = data.current;
-            document.getElementById('current-date').innerText = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' });
             document.getElementById('current-temp').innerText = `${Math.round(current.temperature_2m)}°`;
             document.getElementById('humidity-val').innerText = `${current.relative_humidity_2m}%`;
             document.getElementById('wind-val').innerHTML = `${Math.round(current.wind_speed_10m)} <span class="text-[8px]">km/h</span>`;
@@ -290,42 +236,38 @@
 
             const info = weatherMap[current.weather_code] || weatherMap[0];
             const iconEl = document.getElementById('main-icon');
-            const iconClass = current.is_day ? info.day : (info.night || info.icon || info.day);
+            const iconClass = current.is_day ? (info.day || info.icon) : (info.night || info.icon || info.day);
             
+            // Update Ikon Utama dengan Gradasi Berwarna
             iconEl.className = `fas ${iconClass} text-7xl weather-animate ${info.color}`;
             document.getElementById('weather-desc-main').innerText = info.label;
 
-            // Update Efek Partikel
             updateEffects(current.weather_code);
 
-            // Render Hourly
+            // Hourly List
             const listContainer = document.getElementById('hourly-list');
             let listHTML = '';
-            const limit = 15;
-            for(let i=1; i<=limit; i++) {
+            for(let i=1; i<=20; i++) {
                 const time = new Date(data.hourly.time[i]);
-                const temp = Math.round(data.hourly.temperature_2m[i]);
                 const code = data.hourly.weather_code[i];
                 const hInfo = weatherMap[code] || weatherMap[0];
-                const h = time.getHours();
-                const hIcon = (h >= 6 && h < 18) ? hInfo.day : (hInfo.night || hInfo.icon || hInfo.day);
+                const hIcon = (time.getHours() >= 6 && time.getHours() < 18) ? (hInfo.day || hInfo.icon) : (hInfo.night || hInfo.icon || hInfo.day);
 
                 listHTML += `
                     <div class="hourly-item">
-                        <span class="text-xs font-bold text-orange-500 w-12">${h.toString().padStart(2, '0')}.00</span>
+                        <span class="text-xs font-bold text-orange-500 w-12">${time.getHours().toString().padStart(2, '0')}.00</span>
                         <div class="flex flex-1 items-center gap-3">
-                            <i class="fas ${hIcon} ${hInfo.color} text-base"></i>
+                            <i class="fas ${hIcon} ${hInfo.color} text-lg"></i>
                             <span class="text-xs font-semibold text-white/90">${hInfo.label}</span>
                         </div>
-                        <span class="font-bold text-sm text-white">${temp}°</span>
+                        <span class="font-bold text-sm text-white">${Math.round(data.hourly.temperature_2m[i])}°</span>
                     </div>`;
             }
-            listContainer.innerHTML = listHTML + listHTML; // Duplicate for infinite scroll effect
+            listContainer.innerHTML = listHTML + listHTML;
 
-            // Alert
             if (info.severe) {
                 document.getElementById('weather-alert').classList.remove('hidden');
-                document.getElementById('alert-title').innerText = `Waspada ${info.label}. Lantai peron mungkin licin.`;
+                document.getElementById('alert-title').innerText = `WASPADA: ${info.label}. Perhatikan langkah saat naik kereta.`;
             }
         }
 
