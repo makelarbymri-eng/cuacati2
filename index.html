@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KAI Weather - Interactive Atmosphere</title>
+    <title>KAI Weather Information System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -49,85 +49,57 @@
             margin-bottom: 1rem;
             z-index: 10;
             position: relative;
-            overflow: hidden; /* Penting untuk memotong partikel */
+            overflow: hidden;
         }
 
-        /* --- EFEK CUACA OVERLAY --- */
+        /* --- WEATHER ATMOSPHERE EFFECTS --- */
         #weather-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
-            z-index: 1;
+            z-index: 2;
         }
 
-        /* Efek Hujan */
         .rain-drop {
             position: absolute;
-            background: linear-gradient(transparent, #4facfe);
+            background: rgba(0, 51, 102, 0.4);
             width: 2px;
-            height: 15px;
+            height: 12px;
             top: -20px;
             animation: fall linear infinite;
         }
-        @keyframes fall {
-            to { transform: translateY(200px); }
-        }
+        @keyframes fall { to { transform: translateY(250px); } }
 
-        /* Efek Cerah/Glow */
         .sun-glow {
             position: absolute;
-            width: 150px; height: 150px;
-            background: radial-gradient(circle, rgba(255,165,0,0.2) 0%, transparent 70%);
-            border-radius: 50%;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(255, 102, 0, 0.15) 0%, transparent 70%);
             top: -50px; right: -50px;
-            animation: rotateGlow 10s linear infinite;
+            animation: pulse-glow 4s ease-in-out infinite;
         }
-        @keyframes rotateGlow {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
+        @keyframes pulse-glow { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
 
-        /* Efek Mendung/Berawan */
-        .cloud-mist {
-            position: absolute;
-            width: 200%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.05), transparent);
-            top: 0; left: -100%;
-            animation: drift 8s linear infinite;
-        }
-        @keyframes drift {
-            to { left: 100%; }
-        }
-
-        /* Efek Petir */
         .lightning-flash {
             position: absolute;
-            top:0; left:0; width:100%; height:100%;
-            background: white;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.8);
             opacity: 0;
-            z-index: 2;
+            z-index: 3;
+            pointer-events: none;
         }
-        .flash-active { animation: flashEffect 3s infinite; }
-        @keyframes flashEffect {
+        .flash-active { animation: lightning-anim 4s infinite; }
+        @keyframes lightning-anim {
             0%, 90%, 100% { opacity: 0; }
-            92% { opacity: 0.3; }
-            94% { opacity: 0; }
-            96% { opacity: 0.3; }
+            92% { opacity: 1; }
+            93% { opacity: 0; }
+            94% { opacity: 1; }
         }
 
-        /* --- UI STANDAR --- */
+        /* --- UI STYLING --- */
         .font-header { font-family: 'Montserrat', sans-serif; }
         
-        .weather-animate {
-            animation: float 4s ease-in-out infinite;
-            position: relative;
-            z-index: 5;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
+        .weather-animate { animation: float 4s ease-in-out infinite; position: relative; z-index: 5; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
 
         .scroll-wrapper {
             position: relative;
@@ -144,10 +116,7 @@
             animation: scroll-up 25s linear infinite;
         }
 
-        @keyframes scroll-up {
-            from { transform: translateY(0); }
-            to { transform: translateY(-50%); }
-        }
+        @keyframes scroll-up { from { transform: translateY(0); } to { transform: translateY(-50%); } }
 
         .hourly-item {
             display: flex;
@@ -163,13 +132,9 @@
             border-left: 8px solid var(--kai-orange);
             border-radius: 1.25rem;
             padding: 1rem;
-            animation: pulse-alert 2s infinite;
+            animation: alert-pulse 2s infinite;
         }
-
-        @keyframes pulse-alert {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
+        @keyframes alert-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
     </style>
 </head>
 <body>
@@ -188,7 +153,7 @@
 
             <div class="relative z-10">
                 <div class="flex items-center gap-2 mb-2">
-                    <i class="fas fa-location-dot text-orange-600"></i>
+                    <i class="fas fa-location-dot text-orange-600 animate-bounce"></i>
                     <h1 id="city-name" class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Mencari Lokasi...</h1>
                 </div>
                 
@@ -220,7 +185,7 @@
         </div>
 
         <h3 class="text-[10px] font-bold text-white/50 uppercase px-2 mb-2 tracking-[0.2em]">
-            <i class="fas fa-clock mr-1"></i> Prakiraan Cuaca Hari Ini
+            <i class="fas fa-clock mr-1"></i> Jadwal Cuaca Hari Ini
         </h3>
 
         <div class="scroll-wrapper">
@@ -231,10 +196,11 @@
             <div class="alert-kai-v2">
                 <div class="flex items-center gap-2 border-b border-white/20 pb-2 mb-2">
                     <i class="fas fa-triangle-exclamation text-white text-sm"></i>
-                    <h4 class="text-[10px] font-black uppercase text-white tracking-[0.2em]">Peringatan Darurat</h4>
+                    <h4 class="text-[10px] font-black uppercase text-white tracking-[0.2em]">Peringatan Keamanan</h4>
                 </div>
-                <h5 id="alert-title" class="text-lg font-black font-header leading-tight uppercase"></h5>
-                <p id="alert-subtitle" class="text-[11px] font-medium opacity-90"></p>
+                <h5 id="alert-title" class="text-lg font-black font-header leading-tight uppercase text-white"></h5>
+                <p id="alert-subtitle" class="text-[11px] font-medium opacity-95 text-white mt-1"></p>
+                <p id="alert-instruction" class="text-[10px] font-bold italic text-yellow-300 mt-2 uppercase tracking-tighter"></p>
             </div>
         </div>
     </div>
@@ -246,8 +212,8 @@
             2: { day: "fa-cloud-sun", label: "Berawan", color: "text-slate-300", type: 'cloudy' },
             3: { day: "fa-cloud", label: "Mendung", color: "text-slate-400", type: 'cloudy' },
             61: { day: "fa-cloud-rain", label: "Hujan Ringan", color: "text-blue-400", type: 'rainy' },
-            63: { day: "fa-cloud-showers-heavy", label: "Hujan Lebat", color: "text-blue-600", severe: true, type: 'rainy' },
-            95: { day: "fa-bolt", label: "Badai Petir", color: "text-yellow-600", severe: true, type: 'storm' }
+            63: { day: "fa-cloud-showers-heavy", label: "Hujan Lebat", color: "text-blue-600", severe: true, type: 'rainy', advice: "Gunakan payung & jas hujan. Berhati-hati saat melangkah di area peron yang licin." },
+            95: { day: "fa-bolt", label: "Badai Petir", color: "text-yellow-600", severe: true, type: 'storm', advice: "Segera berlindung di dalam bangunan stasiun. Hindari area terbuka dan benda logam." }
         };
 
         function updateClock() {
@@ -255,7 +221,6 @@
         }
         setInterval(updateClock, 1000);
 
-        // --- FUNGSI EFEK VISUAL ---
         function setWeatherAtmosphere(type) {
             const overlay = document.getElementById('weather-overlay');
             const lightning = document.getElementById('lightning');
@@ -263,11 +228,11 @@
             lightning.classList.remove('flash-active');
 
             if (type === 'rainy' || type === 'storm') {
-                for (let i = 0; i < 20; i++) {
+                for (let i = 0; i < 30; i++) {
                     const drop = document.createElement('div');
                     drop.className = 'rain-drop';
                     drop.style.left = Math.random() * 100 + '%';
-                    drop.style.animationDuration = (Math.random() * 0.5 + 0.5) + 's';
+                    drop.style.animationDuration = (0.4 + Math.random() * 0.3) + 's';
                     drop.style.animationDelay = Math.random() * 2 + 's';
                     overlay.appendChild(drop);
                 }
@@ -276,10 +241,6 @@
                 const glow = document.createElement('div');
                 glow.className = 'sun-glow';
                 overlay.appendChild(glow);
-            } else if (type === 'cloudy') {
-                const mist = document.createElement('div');
-                mist.className = 'cloud-mist';
-                overlay.appendChild(mist);
             }
         }
 
@@ -335,13 +296,12 @@
             mainIcon.className = `fas ${info.day} text-7xl weather-animate ${info.color}`;
             document.getElementById('weather-desc-main').innerText = info.label;
 
-            // Trigger Atmosphere Effect
             setWeatherAtmosphere(info.type);
 
             const listContainer = document.getElementById('hourly-list');
             const alertBox = document.getElementById('weather-alert');
             let baseHTML = '';
-            let badWeatherLog = [];
+            let badWeather = null;
             
             const todayItems = data.hourly.time.map((t, idx) => ({
                 time: new Date(t),
@@ -354,7 +314,7 @@
                     const h = item.time.getHours();
                     const infoItem = weatherMap[item.code] || { day: "fa-cloud", label: "Berawan", color: "text-white", severe: false };
                     
-                    if (infoItem.severe) badWeatherLog.push({ jam: `${h.toString().padStart(2, '0')}.00`, kondisi: infoItem.label });
+                    if (infoItem.severe && !badWeather) badWeather = { jam: `${h.toString().padStart(2, '0')}.00`, info: infoItem };
 
                     baseHTML += `
                         <div class="hourly-item">
@@ -367,13 +327,13 @@
                         </div>`;
                 });
 
-                const repeatFactor = todayItems.length < 5 ? 8 : 2;
-                listContainer.innerHTML = baseHTML.repeat(repeatFactor);
+                listContainer.innerHTML = baseHTML.repeat(todayItems.length < 5 ? 8 : 2);
 
-                if (badWeatherLog.length > 0) {
+                if (badWeather) {
                     alertBox.classList.remove('hidden');
-                    document.getElementById('alert-title').innerText = `WASPADA ${badWeatherLog[0].kondisi}`;
-                    document.getElementById('alert-subtitle').innerText = `Prediksi sisa hari ini pukul ${badWeatherLog[0].jam}.`;
+                    document.getElementById('alert-title').innerText = `WASPADA ${badWeather.info.label}`;
+                    document.getElementById('alert-subtitle').innerText = `Pukul ${badWeather.jam} diperkirakan kondisi memburuk.`;
+                    document.getElementById('alert-instruction').innerText = `HIMBAUAN: ${badWeather.info.advice}`;
                 } else { alertBox.classList.add('hidden'); }
             }
         }
