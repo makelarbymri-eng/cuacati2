@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KAI Weather Information System - BMKG Data</title>
+    <title>KAI Weather Information System - Kelurahan Level</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -91,7 +91,6 @@
 
         .font-header { font-family: 'Montserrat', sans-serif; }
         
-        /* Badge Live */
         .live-badge {
             background: var(--kai-red);
             color: white;
@@ -131,14 +130,16 @@
             border-left: 8px solid var(--kai-orange);
             border-radius: 1.25rem;
             padding: 1rem;
+            animation: alert-pulse 2s infinite;
         }
+        @keyframes alert-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
     </style>
 </head>
 <body>
 
     <div class="app-container">
         <div class="flex justify-between items-center mb-4 px-2">
-            <div class="font-header font-black text-2xl italic tracking-tighter">
+            <div class="font-header font-black text-2xl italic tracking-tighter text-white">
                 KAI<span style="color: var(--kai-orange);">.</span>
             </div>
             <div id="digital-clock" class="font-mono font-bold text-lg text-orange-400">00:00:00</div>
@@ -152,16 +153,19 @@
                 <div class="flex justify-between items-start mb-2">
                     <div class="flex items-center gap-2">
                         <i class="fas fa-location-dot text-orange-600"></i>
-                        <h1 id="city-name" class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Mencari Lokasi...</h1>
+                        <div class="flex flex-col">
+                            <h1 id="kelurahan-name" class="text-[10px] font-black uppercase tracking-widest text-slate-800 leading-none mb-1">Mencari Kelurahan...</h1>
+                            <h2 id="city-name" class="text-[8px] font-bold uppercase tracking-widest text-slate-400">Memuat Kota...</h2>
+                        </div>
                     </div>
                     <span class="live-badge">LIVE BMKG</span>
                 </div>
                 
                 <div class="flex justify-between items-center mb-4">
                     <div>
-                        <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">Kondisi Saat Ini:</div>
+                        <div class="text-[9px] font-bold text-slate-400 uppercase mb-1">Cuaca Saat Ini:</div>
                         <h2 id="current-temp" class="text-6xl font-black font-header tracking-tighter">--°</h2>
-                        <p id="weather-desc-main" class="text-sm font-bold text-orange-600 uppercase">Memuat...</p>
+                        <p id="weather-desc-main" class="text-sm font-bold text-orange-600 uppercase leading-none">Memuat...</p>
                     </div>
                     <div class="flex flex-col items-center">
                         <i id="main-icon" class="fas fa-spinner fa-spin text-5xl text-slate-300 mb-2"></i>
@@ -171,11 +175,11 @@
 
                 <div class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100 text-center">
                     <div>
-                        <p class="text-[9px] uppercase font-bold text-slate-400">Kelembaban</p>
+                        <p class="text-[9px] uppercase font-bold text-slate-400">Lembab</p>
                         <p id="humidity-val" class="text-sm font-black text-slate-700 font-header">--%</p>
                     </div>
                     <div class="border-x border-slate-100">
-                        <p class="text-[9px] uppercase font-bold text-slate-400">Kecepatan Angin</p>
+                        <p class="text-[9px] uppercase font-bold text-slate-400">Angin</p>
                         <p id="wind-val" class="text-sm font-black text-slate-700 font-header">--</p>
                     </div>
                     <div>
@@ -197,17 +201,17 @@
         <div id="weather-alert" class="hidden mt-4">
             <div class="alert-kai-v2">
                 <div class="flex items-center gap-2 border-b border-white/20 pb-2 mb-2">
-                    <i class="fas fa-triangle-exclamation text-white text-sm animate-pulse"></i>
-                    <h4 class="text-[10px] font-black uppercase text-white tracking-[0.2em]">Peringatan BMKG</h4>
+                    <i class="fas fa-triangle-exclamation text-white text-sm"></i>
+                    <h4 class="text-[10px] font-black uppercase text-white tracking-[0.2em]">Peringatan Keamanan</h4>
                 </div>
-                <h5 id="alert-title" class="text-lg font-black font-header text-white uppercase"></h5>
-                <p id="alert-instruction" class="text-[10px] font-bold italic text-yellow-300 mt-2 uppercase"></p>
+                <h5 id="alert-title" class="text-lg font-black font-header leading-tight uppercase text-white"></h5>
+                <p id="alert-subtitle" class="text-[11px] font-medium opacity-95 text-white mt-1"></p>
+                <p id="alert-instruction" class="text-[10px] font-bold italic text-yellow-300 mt-2 uppercase tracking-tighter"></p>
             </div>
         </div>
     </div>
 
     <script>
-        // Mapping Kode Cuaca disesuaikan dengan standar BMKG
         const weatherMap = {
             0: { day: "fa-sun", label: "Cerah", color: "text-orange-400", type: 'sunny' },
             1: { day: "fa-cloud-sun", label: "Cerah Berawan", color: "text-orange-200", type: 'cloudy' },
@@ -215,8 +219,8 @@
             3: { day: "fa-cloud", label: "Berawan Tebal", color: "text-slate-400", type: 'cloudy' },
             45: { day: "fa-smog", label: "Udara Kabur", color: "text-slate-200", type: 'cloudy' },
             61: { day: "fa-cloud-rain", label: "Hujan Ringan", color: "text-blue-400", type: 'rainy' },
-            63: { day: "fa-cloud-showers-heavy", label: "Hujan Sedang", color: "text-blue-500", severe: true, type: 'rainy', advice: "Sedia Payung/Jas Hujan. Waspada lantai peron licin." },
-            95: { day: "fa-bolt", label: "Hujan Petir", color: "text-yellow-600", severe: true, type: 'storm', advice: "Waspada Petir. Segera berlindung di dalam gedung stasiun." }
+            63: { day: "fa-cloud-showers-heavy", label: "Hujan Sedang", color: "text-blue-500", severe: true, type: 'rainy', advice: "Gunakan payung & jas hujan. Berhati-hati saat melangkah di area peron yang licin." },
+            95: { day: "fa-bolt", label: "Hujan Petir", color: "text-yellow-600", severe: true, type: 'storm', advice: "Segera berlindung di dalam bangunan stasiun. Hindari area terbuka dan benda logam." }
         };
 
         function updateClock() {
@@ -262,13 +266,14 @@
                 const res = await fetch('https://ipapi.co/json/');
                 const data = await res.json();
                 fetchWeatherData(data.latitude, data.longitude, true);
-            } catch (e) { document.getElementById('city-name').innerText = "Lokasi Tidak Terdeteksi"; }
+            } catch (e) { 
+                document.getElementById('kelurahan-name').innerText = "Lokasi Tidak Terdeteksi";
+                document.getElementById('city-name').innerText = "Cek Koneksi";
+            }
         }
 
         async function fetchWeatherData(lat, lon, isIP = false) {
             try {
-                // Menggunakan Open-Meteo dengan model BMKG (Meteo France/Germany disesuaikan koordinat Indo)
-                // Ditambah parameter 'apparent_temperature' untuk "Feels Like"
                 const [geoRes, weatherRes] = await Promise.all([
                     fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=id`),
                     fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,is_day,wind_speed_10m&hourly=temperature_2m,weather_code&daily=uv_index_max&timezone=auto`)
@@ -277,10 +282,10 @@
                 const geoData = await geoRes.json();
                 const weatherData = await weatherRes.json();
                 
-                if (!isIP) {
-                    // Fokus ke Kecamatan
-                    document.getElementById('city-name').innerText = `Kec. ${geoData.locality || "Area Stasiun"}`;
-                }
+                // Menampilkan Kelurahan dan Kota
+                document.getElementById('kelurahan-name').innerText = `Kel. ${geoData.locality || "Area Stasiun"}`;
+                document.getElementById('city-name').innerText = geoData.city || geoData.principalSubdivision || "Indonesia";
+                
                 renderUI(weatherData);
             } catch (e) { console.error(e); }
         }
@@ -290,7 +295,6 @@
             const akhirHari = new Date();
             akhirHari.setHours(23, 59, 59);
 
-            // Update UI Utama
             document.getElementById('current-temp').innerText = `${Math.round(data.current.temperature_2m)}°`;
             document.getElementById('feels-like').innerText = `Terasa: ${Math.round(data.current.apparent_temperature)}°`;
             document.getElementById('humidity-val').innerText = `${data.current.relative_humidity_2m}%`;
@@ -304,7 +308,6 @@
 
             setWeatherAtmosphere(info.type);
 
-            // Render List Jam
             const listContainer = document.getElementById('hourly-list');
             const alertBox = document.getElementById('weather-alert');
             let baseHTML = '';
@@ -319,7 +322,7 @@
             if (todayItems.length > 0) {
                 todayItems.forEach(item => {
                     const h = item.time.getHours();
-                    const infoItem = weatherMap[item.code] || { day: "fa-cloud", label: "Berawan", color: "text-white" };
+                    const infoItem = weatherMap[item.code] || { day: "fa-cloud", label: "Berawan", color: "text-white", severe: false };
                     
                     if (infoItem.severe && !badWeather) badWeather = { jam: `${h.toString().padStart(2, '0')}.00`, info: infoItem };
 
@@ -338,8 +341,9 @@
 
                 if (badWeather) {
                     alertBox.classList.remove('hidden');
-                    document.getElementById('alert-title').innerText = `WASPADA ${badWeather.info.label} - ${badWeather.jam}`;
-                    document.getElementById('alert-instruction').innerText = `${badWeather.info.advice}`;
+                    document.getElementById('alert-title').innerText = `WASPADA ${badWeather.info.label}`;
+                    document.getElementById('alert-subtitle').innerText = `Pukul ${badWeather.jam} diperkirakan kondisi memburuk.`;
+                    document.getElementById('alert-instruction').innerText = `HIMBAUAN: ${badWeather.info.advice}`;
                 } else { alertBox.classList.add('hidden'); }
             }
         }
