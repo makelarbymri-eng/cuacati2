@@ -1,294 +1,319 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KAI Weather Information System - Vivid Icons</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --kai-blue: #003366;
-            --kai-orange: #FF6600;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KAI Weather Information System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --kai-blue: #003366;
+            --kai-orange: #FF6600;
+            --kai-dark-blue: #002244;
+            --kai-red: #d32f2f;
+        }
 
-        body {
-            background: #FF6600;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-        }
+        body {
+            background: #FF6600;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            color: white;
+            margin: 0;
+        }
 
-        .app-container {
-            width: 100%;
-            max-width: 420px;
-            height: 95vh;
-            background: var(--kai-blue);
-            display: flex;
-            flex-direction: column;
-            padding: 1.25rem;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
-            border: 1px solid rgba(255,255,255,0.1);
-            position: relative;
-            overflow: hidden;
-        }
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            height: 95vh;
+            background: var(--kai-blue);
+            display: flex;
+            flex-direction: column;
+            padding: 1.25rem;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
 
-        .kai-main-card {
-            background: white;
-            border-top: 6px solid var(--kai-orange);
-            border-radius: 1.25rem;
-            padding: 1.25rem;
-            color: var(--kai-blue);
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
-            margin-bottom: 1rem;
-            z-index: 10;
-            position: relative;
-            overflow: hidden;
-        }
+        .kai-main-card {
+            background: white;
+            border-top: 6px solid var(--kai-orange);
+            border-radius: 1.25rem;
+            padding: 1.25rem;
+            color: var(--kai-blue);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+            margin-bottom: 1rem;
+            z-index: 10;
+        }
 
-        /* --- WARNA IKON DINAMIS (GRADIENT) --- */
-        .vivid-sun {
-            background: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 8px rgba(255, 140, 0, 0.4));
-        }
-        .vivid-cloud-sun {
-            background: linear-gradient(135deg, #FFCE63 0%, #708090 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .vivid-cloud {
-            background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .vivid-rain {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 8px rgba(79, 172, 254, 0.4));
-        }
-        .vivid-storm {
-            background: linear-gradient(135deg, #f83600 0%, #f9d423 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 12px rgba(248, 54, 0, 0.5));
-        }
-        .vivid-night {
-            background: linear-gradient(135deg, #A5CCFF 0%, #4B6CB7 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        /* Animasi Icon Utama */
+        .weather-animate {
+            animation: float 4s ease-in-out infinite;
+            filter: drop-shadow(0 8px 15px rgba(0, 51, 102, 0.15));
+        }
 
-        /* --- ANIMASI PARTIKEL --- */
-        .particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
-        .rain-drop { position: absolute; background-color: rgba(174, 194, 224, 0.4); width: 2px; height: 15px; top: -20px; animation: fall linear infinite; }
-        .thunder-flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 2; pointer-events: none; }
-        
-        @keyframes fall { to { transform: translateY(350px); } }
-        @keyframes flash { 0%, 90%, 100% { opacity: 0; } 92% { opacity: 0.3; } 94% { opacity: 0; } 96% { opacity: 0.3; } }
-        .animate-flash { animation: flash 4s infinite; }
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(3deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
 
-        .weather-animate { animation: float 4s ease-in-out infinite; }
-        @keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-12px) rotate(3deg); } }
+        /* Animasi Scroll Jadwal */
+        .scroll-wrapper {
+            position: relative;
+            flex: 1;
+            overflow: hidden;
+            margin: 0.5rem 0;
+            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+        }
 
-        /* Scroll Jadwal */
-        .scroll-wrapper { position: relative; flex: 1; overflow: hidden; mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); }
-        .scroll-content { display: flex; flex-direction: column; gap: 0.5rem; animation: scroll-up 45s linear infinite; }
-        @keyframes scroll-up { 0% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
+        .scroll-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            animation: scroll-up 45s linear infinite;
+        }
 
-        .hourly-item { display: flex; align-items: center; gap: 1rem; padding: 0.85rem; background: rgba(255, 255, 255, 0.08); border-radius: 0.75rem; }
-    </style>
+        @keyframes scroll-up {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-50%); }
+        }
+
+        .hourly-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.85rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+        }
+
+        .alert-kai-v2 {
+            background: var(--kai-red);
+            border-left: 8px solid var(--kai-orange);
+            border-radius: 1.25rem;
+            padding: 1rem;
+            animation: pulse-alert 2s infinite;
+        }
+
+        @keyframes pulse-alert {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .font-header { font-family: 'Montserrat', sans-serif; }
+    </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <div class="flex justify-between items-center mb-4 px-2">
-            <div class="font-header font-black text-2xl italic tracking-tighter text-white">KAI<span class="text-orange-500">.</span></div>
-            <div id="digital-clock" class="font-mono font-bold text-lg text-orange-400">00:00:00</div>
-        </div>
+    <div class="app-container">
+        <div class="flex justify-between items-center mb-4 px-2">
+            <div class="font-header font-black text-2xl italic tracking-tighter">
+                KAI<span style="color: var(--kai-orange);">.</span>
+            </div>
+            <div id="digital-clock" class="font-mono font-bold text-lg opacity-90 text-orange-400">00:00:00</div>
+        </div>
 
-        <div class="kai-main-card">
-            <div id="particle-overlay" class="particle-container"></div>
-            <div id="thunder-overlay" class="thunder-flash"></div>
+        <div class="kai-main-card">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="fas fa-location-dot text-orange-600 animate-bounce"></i>
+                <h1 id="city-name" class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Mencari Lokasi...</h1>
+            </div>
+            
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h2 id="current-temp" class="text-6xl font-black font-header tracking-tighter">--°</h2>
+                    <p id="weather-desc-main" class="text-sm font-bold text-orange-600 uppercase">Memuat...</p>
+                </div>
+                <div class="flex items-center justify-center w-24 h-24">
+                    <i id="main-icon" class="fas fa-spinner fa-spin text-5xl text-slate-300"></i>
+                </div>
+            </div>
 
-            <div class="relative z-10">
-                <div class="flex items-center gap-2 mb-2">
-                    <i class="fas fa-location-dot text-orange-600 animate-bounce text-[10px]"></i>
-                    <h1 id="city-name" class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Mendeteksi Stasiun...</h1>
-                </div>
-                
-                <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <h2 id="current-temp" class="text-6xl font-black font-header tracking-tighter">--°</h2>
-                        <p id="weather-desc-main" class="text-sm font-bold text-orange-600 uppercase tracking-tighter">Memuat...</p>
-                    </div>
-                    <div class="flex items-center justify-center w-28 h-28">
-                        <i id="main-icon" class="fas fa-spinner fa-spin text-5xl text-slate-200"></i>
-                    </div>
-                </div>
+            <div class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100">
+                <div class="text-center">
+                    <i class="fas fa-droplet text-blue-500 text-xs mb-1"></i>
+                    <p class="text-[9px] uppercase font-bold text-slate-400">Lembab</p>
+                    <p id="humidity-val" class="text-sm font-black text-slate-700">--%</p>
+                </div>
+                <div class="text-center border-x border-slate-100">
+                    <i class="fas fa-wind text-slate-400 text-xs mb-1"></i>
+                    <p class="text-[9px] uppercase font-bold text-slate-400">Angin</p>
+                    <p id="wind-val" class="text-sm font-black text-slate-700">--</p>
+                </div>
+                <div class="text-center">
+                    <i class="fas fa-mask-face text-emerald-500 text-xs mb-1"></i>
+                    <p class="text-[9px] uppercase font-bold text-slate-400">Polusi</p>
+                    <p id="aqi-val" class="text-sm font-black text-slate-700">--</p>
+                </div>
+            </div>
+            
+            <p id="current-date" class="text-[9px] font-bold text-slate-400 mt-4 uppercase tracking-tight text-center italic"></p>
+        </div>
 
-                <div class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100">
-                    <div class="text-center">
-                        <i class="fas fa-droplet text-blue-500 text-xs mb-1"></i>
-                        <p class="text-[8px] uppercase font-bold text-slate-400">Kelembaban</p>
-                        <p id="humidity-val" class="text-xs font-black text-slate-700">--%</p>
-                    </div>
-                    <div class="text-center border-x border-slate-100">
-                        <i class="fas fa-wind text-slate-400 text-xs mb-1"></i>
-                        <p class="text-[8px] uppercase font-bold text-slate-400">Angin</p>
-                        <p id="wind-val" class="text-xs font-black text-slate-700">--</p>
-                    </div>
-                    <div class="text-center">
-                        <i class="fas fa-mask-face text-emerald-500 text-xs mb-1"></i>
-                        <p class="text-[8px] uppercase font-bold text-slate-400">Polusi</p>
-                        <p id="aqi-val" class="text-xs font-black text-slate-700">--</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <h3 class="text-[10px] font-bold text-white/50 uppercase px-2 mb-2 tracking-[0.2em] flex items-center gap-2">
+            <i class="fas fa-clock text-[9px]"></i> Prakiraan Per Jam
+        </h3>
 
-        <h3 class="text-[10px] font-bold text-white/50 uppercase px-2 mb-2 tracking-[0.2em] flex items-center gap-2">
-            <i class="fas fa-clock text-[9px]"></i> Prediksi Per Jam
-        </h3>
+        <div class="scroll-wrapper">
+            <div id="hourly-list" class="scroll-content"></div>
+        </div>
 
-        <div class="scroll-wrapper">
-            <div id="hourly-list" class="scroll-content"></div>
-        </div>
+        <div id="weather-alert" class="hidden mt-4">
+            <div class="alert-kai-v2">
+                <div class="flex items-center gap-2 border-b border-white/20 pb-2 mb-2">
+                    <i class="fas fa-triangle-exclamation text-white text-sm animate-pulse"></i>
+                    <h4 class="text-[10px] font-black uppercase text-white tracking-[0.2em]">Peringatan Keselamatan</h4>
+                </div>
+                <div id="alert-text-container" class="text-white">
+                    <h5 id="alert-title" class="text-lg font-black font-header leading-tight uppercase"></h5>
+                    <p id="alert-subtitle" class="text-[11px] font-medium opacity-90 leading-tight"></p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <div id="weather-alert" class="hidden mt-4 bg-red-600 rounded-xl p-3 border-l-4 border-orange-500 animate-pulse">
-            <p id="alert-title" class="text-white font-bold text-[11px] leading-tight"></p>
-        </div>
-    </div>
+    <script>
+        const weatherMap = {
+            0: { day: "fa-sun", night: "fa-moon", label: "Cerah", color: "text-orange-400", severe: false },
+            1: { day: "fa-cloud-sun", night: "fa-cloud-moon", label: "Cerah Berawan", color: "text-orange-200", severe: false },
+            2: { day: "fa-cloud-sun", night: "fa-cloud-moon", label: "Berawan", color: "text-slate-300", severe: false },
+            3: { day: "fa-cloud", night: "fa-cloud", label: "Mendung", color: "text-slate-400", severe: false },
+            45: { label: "Kabut", icon: "fa-smog", color: "text-slate-200", severe: false },
+            61: { day: "fa-cloud-rain", night: "fa-cloud-moon-rain", label: "Hujan Ringan", color: "text-blue-300", severe: false },
+            63: { day: "fa-cloud-showers-heavy", night: "fa-cloud-showers-heavy", label: "Hujan Lebat", color: "text-yellow-500", severe: true },
+            95: { day: "fa-bolt", night: "fa-bolt", label: "Badai Petir", color: "text-yellow-600", severe: true }
+        };
 
-    <script>
-        // Mapping Cuaca & Class Warna Ikon
-        const weatherMap = {
-            0: { day: "fa-sun", night: "fa-moon", label: "Cerah", color: "vivid-sun", nightColor: "vivid-night" },
-            1: { day: "fa-cloud-sun", night: "fa-cloud-moon", label: "Cerah Berawan", color: "vivid-cloud-sun", nightColor: "vivid-night" },
-            2: { day: "fa-cloud-sun", night: "fa-cloud-moon", label: "Berawan", color: "vivid-cloud", nightColor: "vivid-night" },
-            3: { day: "fa-cloud", night: "fa-cloud", label: "Mendung", color: "vivid-cloud", nightColor: "vivid-cloud" },
-            45: { label: "Kabut", icon: "fa-smog", color: "vivid-cloud" },
-            61: { day: "fa-cloud-rain", night: "fa-cloud-moon-rain", label: "Hujan Ringan", color: "vivid-rain" },
-            63: { day: "fa-cloud-showers-heavy", night: "fa-cloud-showers-heavy", label: "Hujan Lebat", color: "vivid-rain", severe: true },
-            95: { day: "fa-bolt", night: "fa-bolt", label: "Badai Petir", color: "vivid-storm", severe: true }
-        };
+        function updateClock() {
+            document.getElementById('digital-clock').innerText = new Date().toLocaleTimeString('id-ID', { hour12: false }).replace(/\./g, ':');
+        }
+        setInterval(updateClock, 1000);
 
-        function updateClock() {
-            document.getElementById('digital-clock').innerText = new Date().toLocaleTimeString('id-ID', { hour12: false }).replace(/\./g, ':');
-        }
-        setInterval(updateClock, 1000);
+        // INITIALIZE APP
+        async function initApp() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    async (pos) => {
+                        fetchWeatherData(pos.coords.latitude, pos.coords.longitude);
+                    },
+                    async (error) => {
+                        console.warn("GPS Ditolak/Error, Menggunakan Lokasi IP...");
+                        fallbackToIP();
+                    },
+                    { timeout: 5000 }
+                );
+            } else {
+                fallbackToIP();
+            }
+        }
 
-        function updateEffects(code) {
-            const overlay = document.getElementById('particle-overlay');
-            const thunder = document.getElementById('thunder-overlay');
-            overlay.innerHTML = '';
-            thunder.classList.remove('animate-flash');
+        // FALLBACK: Ambil lokasi berdasarkan alamat IP
+        async function fallbackToIP() {
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
+                if(data.latitude) {
+                    document.getElementById('city-name').innerText = `Area ${data.city} (IP Mode)`;
+                    fetchWeatherData(data.latitude, data.longitude, true);
+                }
+            } catch (e) {
+                document.getElementById('city-name').innerText = "Gagal Deteksi Lokasi";
+            }
+        }
 
-            if (code >= 61) {
-                for (let i = 0; i < 30; i++) {
-                    const drop = document.createElement('div');
-                    drop.className = 'rain-drop';
-                    drop.style.left = Math.random() * 100 + '%';
-                    drop.style.animationDuration = (Math.random() * 0.5 + 0.4) + 's';
-                    drop.style.animationDelay = Math.random() * 2 + 's';
-                    overlay.appendChild(drop);
-                }
-            }
-            if (code === 95) thunder.classList.add('animate-flash');
-        }
+        async function fetchWeatherData(lat, lon, isIP = false) {
+            try {
+                const [geoRes, weatherRes, airRes] = await Promise.all([
+                    fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=id`),
+                    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,is_day,wind_speed_10m&hourly=temperature_2m,weather_code&timezone=auto&forecast_days=2`),
+                    fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi`)
+                ]);
 
-        async function initApp() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => fetchWeatherData(pos.coords.latitude, pos.coords.longitude),
-                    () => fallbackToIP(),
-                    { timeout: 5000 }
-                );
-            } else fallbackToIP();
-        }
+                const geoData = await geoRes.json();
+                const weatherData = await weatherRes.json();
+                const airData = await airRes.json();
+                
+                if (!isIP) {
+                    document.getElementById('city-name').innerText = `Area ${geoData.city || geoData.locality || "Sekitar Stasiun"}`;
+                }
+                renderUI(weatherData, airData);
+            } catch (e) {
+                console.error("Fetch error:", e);
+            }
+        }
 
-        async function fallbackToIP() {
-            try {
-                const res = await fetch('https://ipapi.co/json/');
-                const data = await res.json();
-                if(data.latitude) fetchWeatherData(data.latitude, data.longitude, true, data.city);
-            } catch (e) { document.getElementById('city-name').innerText = "Lokasi Tidak Ditemukan"; }
-        }
+        function renderUI(data, air) {
+            document.getElementById('current-date').innerText = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('current-temp').innerText = `${Math.round(data.current.temperature_2m)}°`;
+            document.getElementById('humidity-val').innerText = `${data.current.relative_humidity_2m}%`;
+            document.getElementById('wind-val').innerHTML = `${Math.round(data.current.wind_speed_10m)} <span class="text-[8px]">km/h</span>`;
+            document.getElementById('aqi-val').innerText = air.current.european_aqi || "--";
 
-        async function fetchWeatherData(lat, lon, isIP = false, ipCity = "") {
-            try {
-                const [geoRes, weatherRes, airRes] = await Promise.all([
-                    fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=id`),
-                    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,is_day,wind_speed_10m&hourly=temperature_2m,weather_code&timezone=auto&forecast_days=2`),
-                    fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi`)
-                ]);
+            const isDay = data.current.is_day === 1;
+            const currentInfo = weatherMap[data.current.weather_code] || { day: "fa-cloud", night: "fa-cloud", label: "Berawan", color: "text-slate-400" };
+            
+            // Update Icon & Apply Animation
+            const mainIcon = document.getElementById('main-icon');
+            mainIcon.className = `fas ${isDay ? currentInfo.day : (currentInfo.night || currentInfo.icon)} text-7xl weather-animate ${currentInfo.color}`;
+            document.getElementById('weather-desc-main').innerText = currentInfo.label;
 
-                const geoData = await geoRes.json();
-                const weatherData = await weatherRes.json();
-                const airData = await airRes.json();
-                
-                document.getElementById('city-name').innerText = isIP ? `Area ${ipCity}` : `Area ${geoData.city || geoData.locality}`;
-                renderUI(weatherData, airData);
-            } catch (e) { console.error(e); }
-        }
+            // Hourly List Logic
+            const listContainer = document.getElementById('hourly-list');
+            let listHTML = '';
+            const sekarang = new Date();
+            sekarang.setMinutes(0, 0, 0);
 
-        function renderUI(data, air) {
-            const current = data.current;
-            document.getElementById('current-temp').innerText = `${Math.round(current.temperature_2m)}°`;
-            document.getElementById('humidity-val').innerText = `${current.relative_humidity_2m}%`;
-            document.getElementById('wind-val').innerHTML = `${Math.round(current.wind_speed_10m)} <span class="text-[7px]">km/h</span>`;
-            document.getElementById('aqi-val').innerText = air.current.european_aqi || "--";
+            const upcoming = data.hourly.time.map((t, idx) => ({
+                time: new Date(t),
+                temp: Math.round(data.hourly.temperature_2m[idx]),
+                code: data.hourly.weather_code[idx]
+            })).filter(item => item.time > sekarang).slice(0, 15);
 
-            const info = weatherMap[current.weather_code] || weatherMap[0];
-            const iconEl = document.getElementById('main-icon');
-            
-            // Logika Ikon dan Warna Berwarna
-            const isDay = current.is_day === 1;
-            const iconClass = isDay ? (info.day || info.icon) : (info.night || info.icon || info.day);
-            const colorClass = isDay ? info.color : (info.nightColor || info.color);
-            
-            // Update Tampilan Ikon Utama
-            iconEl.className = `fas ${iconClass} text-8xl weather-animate ${colorClass}`;
-            document.getElementById('weather-desc-main').innerText = info.label;
+            let badWeatherLog = [];
 
-            updateEffects(current.weather_code);
+            upcoming.forEach(item => {
+                const h = item.time.getHours();
+                const itemIsDay = (h >= 6 && h < 18);
+                const info = weatherMap[item.code] || { day: "fa-cloud", night: "fa-cloud", label: "Berawan", color: "text-white", severe: false };
+                const itemIcon = itemIsDay ? (info.day || info.icon) : (info.night || info.icon);
 
-            // Hourly List
-            const listContainer = document.getElementById('hourly-list');
-            let listHTML = '';
-            for(let i=1; i<=20; i++) {
-                const time = new Date(data.hourly.time[i]);
-                const code = data.hourly.weather_code[i];
-                const hInfo = weatherMap[code] || weatherMap[0];
-                const hIsDay = time.getHours() >= 6 && time.getHours() < 18;
-                const hIcon = hIsDay ? (hInfo.day || hInfo.icon) : (hInfo.night || hInfo.icon || hInfo.day);
-                const hColor = hIsDay ? hInfo.color : (hInfo.nightColor || hInfo.color);
+                if (info.severe) badWeatherLog.push({ jam: `${h.toString().padStart(2, '0')}.00`, kondisi: info.label });
 
-                listHTML += `
-                    <div class="hourly-item">
-                        <span class="text-xs font-bold text-orange-500 w-12">${time.getHours().toString().padStart(2, '0')}.00</span>
-                        <div class="flex flex-1 items-center gap-3">
-                            <i class="fas ${hIcon} ${hColor} text-lg"></i>
-                            <span class="text-[11px] font-semibold text-white/90">${hInfo.label}</span>
-                        </div>
-                        <span class="font-bold text-sm text-white">${Math.round(data.hourly.temperature_2m[i])}°</span>
-                    </div>`;
-            }
-            listContainer.innerHTML = listHTML + listHTML;
+                listHTML += `
+                    <div class="hourly-item">
+                        <span class="text-xs font-bold text-orange-500 w-12">${h.toString().padStart(2, '0')}.00</span>
+                        <div class="flex flex-1 items-center gap-3">
+                            <i class="fas ${itemIcon} ${info.color} text-base"></i>
+                            <span class="text-xs font-semibold text-white/90">${info.label}</span>
+                        </div>
+                        <span class="font-bold text-sm text-right w-10 text-white">${item.temp}°</span>
+                    </div>`;
+            });
 
-            if (info.severe) {
-                document.getElementById('weather-alert').classList.remove('hidden');
-                document.getElementById('alert-title').innerText = `WASPADA: ${info.label}. Gunakan payung dan hati-hati saat melangkah ke kereta.`;
-            }
-        }
+            listContainer.innerHTML = listHTML + listHTML;
 
-        initApp();
-    </script>
+            // Alert Control
+            const alertBox = document.getElementById('weather-alert');
+            if (badWeatherLog.length > 0) {
+                const uniqueTimes = [...new Set(badWeatherLog.map(b => b.jam))].slice(0, 2);
+                alertBox.classList.remove('hidden');
+                document.getElementById('alert-title').innerText = `WASPADA ${badWeatherLog[0].kondisi}`;
+                document.getElementById('alert-subtitle').innerText = `Pukul ${uniqueTimes.join(' & ')}. Perhatikan langkah saat naik/turun kereta.`;
+            } else {
+                alertBox.classList.add('hidden');
+            }
+        }
+
+        initApp();
+        updateClock();
+    </script>
 </body>
 </html>
