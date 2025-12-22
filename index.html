@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KAI Weather - Dual Mode Alert System</title>
+    <title>KAI Weather - Perfect Typography</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
             --kai-blue: #003366; 
             --kai-orange: #FF6600; 
             --kai-red: #d32f2f;
-            --kai-green: #2e7d32; /* Warna hijau KAI untuk info standar */
+            --kai-green: #2e7d32;
         }
         body { background: #FF6600; min-height: 100vh; display: flex; justify-content: center; align-items: center; font-family: 'Inter', sans-serif; margin: 0; color: white; }
         
@@ -25,17 +25,29 @@
 
         .kai-main-card {
             background: white; border-top: 6px solid var(--kai-orange);
-            border-radius: 1.25rem; padding: 1.5rem 1.25rem; color: var(--kai-blue);
+            border-radius: 1.25rem; padding: 1.25rem; color: var(--kai-blue);
             box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); margin-bottom: 1rem;
             z-index: 10; position: relative; overflow: hidden;
         }
 
+        /* TIPOGRAFI KOTA ADAPTIF - Diperkecil & Support 2 Baris */
+        .city-container {
+            display: flex; flex-direction: column; flex: 1; min-width: 0; /* Penting untuk wrap */
+        }
         .city-text {
-            font-size: 1.25rem; line-height: 1.1; word-wrap: break-word;
-            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+            font-size: 1.15rem; /* Ukuran lebih kecil dari sebelumnya agar aman */
+            line-height: 1.2;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: var(--kai-blue);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* Maksimal 2 baris */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
-        /* Weather Effects */
         #weather-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
         .rain-drop { position: absolute; background: rgba(0, 51, 102, 0.4); width: 2px; height: 12px; top: -20px; animation: fall linear infinite; }
         @keyframes fall { to { transform: translateY(300px); } }
@@ -45,13 +57,14 @@
         @keyframes lightning-anim { 0%, 90%, 100% { opacity: 0; } 92% { opacity: 1; } 93% { opacity: 0; } 95% { opacity: 1; } }
 
         .weather-icon-giant {
-            font-size: 5rem; filter: drop-shadow(0 10px 8px rgba(0,0,0,0.1));
+            font-size: 4.5rem; /* Ukuran disesuaikan sedikit agar balance */
+            filter: drop-shadow(0 10px 8px rgba(0,0,0,0.1));
             animation: float-and-pulse 4s ease-in-out infinite; display: inline-block;
         }
 
         @keyframes float-and-pulse {
             0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-15px) scale(1.1); }
+            50% { transform: translateY(-10px) scale(1.05); }
         }
 
         .font-header { font-family: 'Montserrat', sans-serif; }
@@ -61,14 +74,10 @@
 
         .hourly-item { display: flex; align-items: center; gap: 1rem; padding: 0.85rem; background: rgba(255, 255, 255, 0.08); border-radius: 0.75rem; }
 
-        /* Alert Styling - Dynamic Classes */
-        .alert-box { 
-            border-left: 8px solid var(--kai-orange); border-radius: 1.25rem; padding: 1rem; 
-            transition: all 0.5s ease;
-        }
+        /* Alert Styling */
+        .alert-box { border-left: 8px solid var(--kai-orange); border-radius: 1.25rem; padding: 0.85rem 1rem; transition: all 0.5s ease; }
         .alert-danger { background: var(--kai-red); animation: alert-pulse 2s infinite; }
         .alert-info { background: var(--kai-green); }
-
         @keyframes alert-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
     </style>
 </head>
@@ -89,18 +98,18 @@
             
             <div class="relative z-10">
                 <div class="flex items-start gap-3 mb-4">
-                    <i class="fas fa-location-dot text-orange-600 text-xl mt-1"></i>
-                    <div class="flex flex-col flex-1">
-                        <h1 id="city-name" class="font-black font-header uppercase tracking-tight text-slate-800 city-text">Memuat Kota...</h1>
+                    <i class="fas fa-location-dot text-orange-600 text-lg mt-1"></i>
+                    <div class="city-container">
+                        <h1 id="city-name" class="font-header city-text">Memuat Kota...</h1>
                         <h2 id="kelurahan-name" class="text-[9px] font-bold uppercase tracking-widest text-slate-400 mt-1">Mencari Kelurahan...</h2>
                     </div>
                 </div>
                 
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex justify-between items-center mb-4">
                     <div class="flex-1">
-                        <div class="text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-widest">Kondisi Luar:</div>
-                        <h2 id="current-temp" class="text-7xl font-black font-header tracking-tighter leading-none">--°</h2>
-                        <p id="weather-desc-main" class="text-sm font-bold text-orange-600 uppercase mt-2">Sinkronisasi...</p>
+                        <div class="text-[9px] font-bold text-slate-400 uppercase mb-0.5 tracking-widest">Kondisi Luar:</div>
+                        <h2 id="current-temp" class="text-6xl font-black font-header tracking-tighter leading-none">--°</h2>
+                        <p id="weather-desc-main" class="text-[11px] font-bold text-orange-600 uppercase mt-1">Sinkronisasi...</p>
                     </div>
                     
                     <div class="flex-1 flex justify-center items-center">
@@ -110,18 +119,18 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-2 pt-5 border-t border-slate-100 text-center">
+                <div class="grid grid-cols-3 gap-1 pt-4 border-t border-slate-100 text-center">
                     <div>
-                        <p class="text-[9px] uppercase font-bold text-slate-400">Lembab</p>
-                        <p id="humidity-val" class="text-sm font-black text-slate-800 font-header">--%</p>
+                        <p class="text-[8px] uppercase font-bold text-slate-400">Lembab</p>
+                        <p id="humidity-val" class="text-xs font-black text-slate-800 font-header">--%</p>
                     </div>
                     <div class="border-x border-slate-100">
-                        <p class="text-[9px] uppercase font-bold text-slate-400">Kec. Angin</p>
-                        <p id="wind-val" class="text-sm font-black text-slate-800 font-header">--</p>
+                        <p class="text-[8px] uppercase font-bold text-slate-400">Angin</p>
+                        <p id="wind-val" class="text-xs font-black text-slate-800 font-header">--</p>
                     </div>
                     <div>
-                        <p class="text-[9px] uppercase font-bold text-slate-400">Arah Angin</p>
-                        <p id="wind-dir-val" class="text-sm font-black text-slate-800 font-header">--</p>
+                        <p class="text-[8px] uppercase font-bold text-slate-400">Arah</p>
+                        <p id="wind-dir-val" class="text-xs font-black text-slate-800 font-header">--</p>
                     </div>
                 </div>
             </div>
@@ -136,12 +145,12 @@
         <div id="alert-container" class="mt-4">
             <div id="alert-box" class="alert-box alert-info">
                 <div class="flex items-center gap-2 border-b border-white/20 pb-2 mb-2">
-                    <i id="alert-icon" class="fas fa-circle-info text-white text-sm"></i>
-                    <h4 id="alert-type-label" class="text-[10px] font-black uppercase text-white tracking-[0.2em]">Himbauan Keamanan</h4>
+                    <i id="alert-icon" class="fas fa-circle-info text-white text-xs"></i>
+                    <h4 id="alert-type-label" class="text-[9px] font-black uppercase text-white tracking-[0.2em]">Himbauan Keamanan</h4>
                 </div>
-                <h5 id="alert-title" class="text-lg font-black font-header leading-tight uppercase text-white"></h5>
-                <p id="alert-subtitle" class="text-[11px] font-medium text-white mt-1"></p>
-                <p id="alert-instruction" class="text-[10px] font-bold italic text-yellow-300 mt-2 uppercase"></p>
+                <h5 id="alert-title" class="text-base font-black font-header leading-tight uppercase text-white"></h5>
+                <p id="alert-subtitle" class="text-[10px] font-medium text-white mt-0.5"></p>
+                <p id="alert-instruction" class="text-[9px] font-bold italic text-yellow-300 mt-1 uppercase"></p>
             </div>
         </div>
     </div>
@@ -153,14 +162,9 @@
             2: { day: "fa-cloud-sun", label: "Berawan", color: "text-slate-400", type: 'cloudy' },
             3: { day: "fa-cloud", label: "Berawan Tebal", color: "text-slate-500", type: 'cloudy' },
             61: { day: "fa-cloud-rain", label: "Hujan Ringan", color: "text-blue-400", type: 'rainy' },
-            63: { day: "fa-cloud-showers-heavy", label: "Hujan Sedang/Lebat", color: "text-blue-600", severe: true, type: 'rainy', advice: "Gunakan payung & jas hujan. Berhati-hati saat melangkah di area stasiun." },
-            95: { day: "fa-bolt", label: "Badai Petir", color: "text-yellow-600", severe: true, type: 'storm', advice: "Segera berlindung di dalam gedung stasiun. Hindari area terbuka." }
+            63: { day: "fa-cloud-showers-heavy", label: "Hujan Sedang/Lebat", color: "text-blue-600", severe: true, type: 'rainy', advice: "Gunakan payung. Waspada lantai licin." },
+            95: { day: "fa-bolt", label: "Badai Petir", color: "text-yellow-600", severe: true, type: 'storm', advice: "Segera berlindung di dalam stasiun." }
         };
-
-        function getWindDirection(deg) {
-            const arr = ["Utara", "Timur Laut", "Timur", "Tenggara", "Selatan", "Barat Daya", "Barat", "Barat Laut"];
-            return arr[(Math.round(deg / 45) % 8)];
-        }
 
         function updateDateTime() {
             const now = new Date();
@@ -176,8 +180,12 @@
                 const data = await weatherRes.json();
                 const geo = await geoRes.json();
                 const addr = geo.address;
-                document.getElementById('city-name').innerText = addr.city || addr.town || addr.city_district || "Kota";
-                document.getElementById('kelurahan-name').innerText = `Kel./Wil. ${addr.village || addr.suburb || addr.neighbourhood || "Area Stasiun"}`;
+                
+                // Prioritas nama wilayah agar tidak kepanjangan
+                const cityName = addr.city || addr.town || addr.city_district || addr.county || "Kota";
+                
+                document.getElementById('city-name').innerText = cityName;
+                document.getElementById('kelurahan-name').innerText = `Kel./Wil. ${addr.village || addr.suburb || addr.neighbourhood || "Stasiun"}`;
                 renderUI(data);
             } catch (e) { console.error(e); }
         }
@@ -187,7 +195,8 @@
             document.getElementById('current-temp').innerText = `${Math.round(current.temperature_2m)}°`;
             document.getElementById('humidity-val').innerText = `${current.relative_humidity_2m}%`;
             document.getElementById('wind-val').innerText = `${Math.round(current.wind_speed_10m)} km/j`;
-            document.getElementById('wind-dir-val').innerText = getWindDirection(current.wind_direction_10m);
+            const dirArr = ["Utara", "Timur Laut", "Timur", "Tenggara", "Selatan", "Barat Daya", "Barat", "Barat Laut"];
+            document.getElementById('wind-dir-val').innerText = dirArr[(Math.round(current.wind_direction_10m / 45) % 8)];
 
             const info = weatherMap[current.weather_code] || weatherMap[2];
             document.getElementById('weather-desc-main').innerText = info.label;
@@ -198,49 +207,39 @@
             let hourlyHTML = '';
             let badWeather = null;
             const now = new Date();
-            
             data.hourly.time.forEach((t, i) => {
                 const time = new Date(t);
                 if(time > now && time.getDate() === now.getDate()) {
                     const code = data.hourly.weather_code[i];
                     const hInfo = weatherMap[code] || weatherMap[2];
                     if(hInfo.severe && !badWeather) badWeather = { jam: time.getHours(), info: hInfo };
-                    
-                    hourlyHTML += `
-                        <div class="hourly-item">
-                            <span class="text-xs font-bold text-orange-500 w-12 font-header">${time.getHours().toString().padStart(2,'0')}.00</span>
-                            <div class="flex flex-1 items-center gap-3">
-                                <i class="fas ${hInfo.day} ${hInfo.color} text-base"></i>
-                                <span class="text-xs font-semibold text-white/90 font-header">${hInfo.label}</span>
-                            </div>
-                            <span class="font-bold text-sm text-white font-header">${Math.round(data.hourly.temperature_2m[i])}°</span>
-                        </div>`;
+                    hourlyHTML += `<div class="hourly-item">
+                        <span class="text-xs font-bold text-orange-500 w-10 font-header">${time.getHours().toString().padStart(2,'0')}.00</span>
+                        <div class="flex flex-1 items-center gap-2">
+                            <i class="fas ${hInfo.day} ${hInfo.color} text-sm"></i>
+                            <span class="text-[11px] font-semibold text-white/90 font-header">${hInfo.label}</span>
+                        </div>
+                        <span class="font-bold text-sm text-white font-header">${Math.round(data.hourly.temperature_2m[i])}°</span>
+                    </div>`;
                 }
             });
-
             document.getElementById('hourly-list').innerHTML = hourlyHTML.repeat(4);
             
-            // LOGIKA DUAL MODE ALERT
             const alertBox = document.getElementById('alert-box');
-            const alertTypeLabel = document.getElementById('alert-type-label');
-            const alertIcon = document.getElementById('alert-icon');
-
             if(badWeather) {
-                // Mode Cuaca Buruk (Merah)
-                alertBox.className = "alert-box alert-danger";
-                alertIcon.className = "fas fa-triangle-exclamation text-white text-sm";
-                alertTypeLabel.innerText = "Peringatan Cuaca";
+                alertBox.className = "alert-box alert-danger text-white";
+                document.getElementById('alert-icon').className = "fas fa-triangle-exclamation text-white";
+                document.getElementById('alert-type-label').innerText = "Peringatan Cuaca";
                 document.getElementById('alert-title').innerText = `WASPADA ${badWeather.info.label}`;
-                document.getElementById('alert-subtitle').innerText = `Diprediksi terjadi pukul ${badWeather.jam}.00 WIB.`;
+                document.getElementById('alert-subtitle').innerText = `Prediksi pukul ${badWeather.jam}.00 WIB kondisi memburuk.`;
                 document.getElementById('alert-instruction').innerText = `HIMBAUAN: ${badWeather.info.advice}`;
             } else {
-                // Mode Aman / Himbauan Standar (Hijau)
-                alertBox.className = "alert-box alert-info";
-                alertIcon.className = "fas fa-shield-heart text-white text-sm";
-                alertTypeLabel.innerText = "Himbauan Keamanan";
+                alertBox.className = "alert-box alert-info text-white";
+                document.getElementById('alert-icon').className = "fas fa-shield-heart text-white";
+                document.getElementById('alert-type-label').innerText = "Himbauan Keamanan";
                 document.getElementById('alert-title').innerText = "Perjalanan Aman";
-                document.getElementById('alert-subtitle').innerText = "Jagalah barang bawaan pribadi Anda agar tidak tertinggal.";
-                document.getElementById('alert-instruction').innerText = "HIMBAUAN: Tetap patuhi peraturan saat naik atau turun kereta api.";
+                document.getElementById('alert-subtitle').innerText = "Jagalah barang bawaan Anda agar tidak tertinggal.";
+                document.getElementById('alert-instruction').innerText = "HIMBAUAN: Patuhi peraturan saat naik atau turun kereta.";
             }
         }
 
@@ -249,7 +248,7 @@
             const lightning = document.getElementById('lightning');
             overlay.innerHTML = ''; lightning.classList.remove('flash-active');
             if (type === 'rainy' || type === 'storm') {
-                for(let i=0; i<35; i++) {
+                for(let i=0; i<30; i++) {
                     const d = document.createElement('div'); d.className = 'rain-drop';
                     d.style.left = Math.random()*100+'%'; d.style.animationDuration = (Math.random()*0.4+0.4)+'s';
                     overlay.appendChild(d);
