@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KAI Weather - Adaptive City Name</title>
+    <title>KAI Weather - Full Information System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -25,15 +25,9 @@
             z-index: 10; position: relative; overflow: hidden;
         }
 
-        /* Adaptive City Font */
         .city-text {
-            font-size: 1.25rem; /* Ukuran dasar diperkecil sedikit dari 2xl */
-            line-height: 1.1;
-            word-wrap: break-word;
-            display: -webkit-box;
-            -webkit-line-clamp: 2; /* Maksimal 2 baris */
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+            font-size: 1.25rem; line-height: 1.1; word-wrap: break-word;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
 
         #weather-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
@@ -45,10 +39,8 @@
         @keyframes lightning-anim { 0%, 90%, 100% { opacity: 0; } 92% { opacity: 1; } 93% { opacity: 0; } 95% { opacity: 1; } }
 
         .weather-icon-giant {
-            font-size: 5rem;
-            filter: drop-shadow(0 10px 8px rgba(0,0,0,0.1));
-            animation: float-and-pulse 4s ease-in-out infinite;
-            display: inline-block;
+            font-size: 5rem; filter: drop-shadow(0 10px 8px rgba(0,0,0,0.1));
+            animation: float-and-pulse 4s ease-in-out infinite; display: inline-block;
         }
 
         @keyframes float-and-pulse {
@@ -57,7 +49,6 @@
         }
 
         .font-header { font-family: 'Montserrat', sans-serif; }
-
         .scroll-wrapper { position: relative; flex: 1; overflow: hidden; mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); }
         .scroll-content { display: flex; flex-direction: column; gap: 0.5rem; animation: scroll-up 45s linear infinite; }
         @keyframes scroll-up { from { transform: translateY(0); } to { transform: translateY(-50%); } }
@@ -70,9 +61,12 @@
 <body>
 
     <div class="app-container">
-        <div class="flex justify-between items-center mb-4 px-2">
-            <div class="font-header font-black text-2xl italic tracking-tighter">KAI<span style="color: var(--kai-orange);">.</span></div>
-            <div id="digital-clock" class="font-mono font-bold text-lg text-orange-400">00:00:00</div>
+        <div class="flex justify-between items-start mb-4 px-2">
+            <div>
+                <div class="font-header font-black text-2xl italic tracking-tighter leading-none">KAI<span style="color: var(--kai-orange);">.</span></div>
+                <div id="full-date" class="text-[10px] font-bold text-white/70 uppercase tracking-widest mt-1">-- --- ----</div>
+            </div>
+            <div id="digital-clock" class="font-mono font-bold text-xl text-orange-400 leading-none">00:00:00</div>
         </div>
 
         <div class="kai-main-card">
@@ -153,6 +147,19 @@
             const arr = ["Utara", "Timur Laut", "Timur", "Tenggara", "Selatan", "Barat Daya", "Barat", "Barat Laut"];
             return arr[(Math.round(deg / 45) % 8)];
         }
+
+        // Fungsi Update Waktu dan Tanggal
+        function updateDateTime() {
+            const now = new Date();
+            
+            // Jam
+            document.getElementById('digital-clock').innerText = now.toLocaleTimeString('id-ID', {hour12:false}).replace(/\./g, ':');
+            
+            // Hari & Tanggal
+            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            document.getElementById('full-date').innerText = now.toLocaleDateString('id-ID', options);
+        }
+        setInterval(updateDateTime, 1000);
 
         async function fetchWeatherData(lat, lon) {
             try {
@@ -235,9 +242,7 @@
             }
         }
 
-        function updateClock() { document.getElementById('digital-clock').innerText = new Date().toLocaleTimeString('id-ID', {hour12:false}).replace(/\./g, ':'); }
-        setInterval(updateClock, 1000);
-        
+        updateDateTime();
         navigator.geolocation.getCurrentPosition(p => fetchWeatherData(p.coords.latitude, p.coords.longitude), e => fetchWeatherData(-6.2, 106.8));
     </script>
 </body>
