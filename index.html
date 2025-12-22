@@ -3,12 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KAI Weather - Full Information System</title>
+    <title>KAI Weather - Dual Mode Alert System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --kai-blue: #003366; --kai-orange: #FF6600; --kai-red: #d32f2f; }
+        :root { 
+            --kai-blue: #003366; 
+            --kai-orange: #FF6600; 
+            --kai-red: #d32f2f;
+            --kai-green: #2e7d32; /* Warna hijau KAI untuk info standar */
+        }
         body { background: #FF6600; min-height: 100vh; display: flex; justify-content: center; align-items: center; font-family: 'Inter', sans-serif; margin: 0; color: white; }
         
         .app-container {
@@ -30,6 +35,7 @@
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
 
+        /* Weather Effects */
         #weather-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
         .rain-drop { position: absolute; background: rgba(0, 51, 102, 0.4); width: 2px; height: 12px; top: -20px; animation: fall linear infinite; }
         @keyframes fall { to { transform: translateY(300px); } }
@@ -54,7 +60,15 @@
         @keyframes scroll-up { from { transform: translateY(0); } to { transform: translateY(-50%); } }
 
         .hourly-item { display: flex; align-items: center; gap: 1rem; padding: 0.85rem; background: rgba(255, 255, 255, 0.08); border-radius: 0.75rem; }
-        .alert-kai-v2 { background: var(--kai-red); border-left: 8px solid var(--kai-orange); border-radius: 1.25rem; padding: 1rem; animation: alert-pulse 2s infinite; }
+
+        /* Alert Styling - Dynamic Classes */
+        .alert-box { 
+            border-left: 8px solid var(--kai-orange); border-radius: 1.25rem; padding: 1rem; 
+            transition: all 0.5s ease;
+        }
+        .alert-danger { background: var(--kai-red); animation: alert-pulse 2s infinite; }
+        .alert-info { background: var(--kai-green); }
+
         @keyframes alert-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
     </style>
 </head>
@@ -119,11 +133,11 @@
             <div id="hourly-list" class="scroll-content"></div>
         </div>
 
-        <div id="weather-alert" class="hidden mt-4">
-            <div class="alert-kai-v2">
+        <div id="alert-container" class="mt-4">
+            <div id="alert-box" class="alert-box alert-info">
                 <div class="flex items-center gap-2 border-b border-white/20 pb-2 mb-2">
-                    <i class="fas fa-shield-halved text-white text-sm"></i>
-                    <h4 class="text-[10px] font-black uppercase text-white tracking-[0.2em]">Informasi Keamanan</h4>
+                    <i id="alert-icon" class="fas fa-circle-info text-white text-sm"></i>
+                    <h4 id="alert-type-label" class="text-[10px] font-black uppercase text-white tracking-[0.2em]">Himbauan Keamanan</h4>
                 </div>
                 <h5 id="alert-title" class="text-lg font-black font-header leading-tight uppercase text-white"></h5>
                 <p id="alert-subtitle" class="text-[11px] font-medium text-white mt-1"></p>
@@ -139,8 +153,8 @@
             2: { day: "fa-cloud-sun", label: "Berawan", color: "text-slate-400", type: 'cloudy' },
             3: { day: "fa-cloud", label: "Berawan Tebal", color: "text-slate-500", type: 'cloudy' },
             61: { day: "fa-cloud-rain", label: "Hujan Ringan", color: "text-blue-400", type: 'rainy' },
-            63: { day: "fa-cloud-showers-heavy", label: "Hujan Sedang/Lebat", color: "text-blue-600", severe: true, type: 'rainy', advice: "Gunakan payung & jas hujan. Berhati-hati saat melangkah." },
-            95: { day: "fa-bolt", label: "Badai Petir", color: "text-yellow-600", severe: true, type: 'storm', advice: "Segera berlindung di dalam stasiun." }
+            63: { day: "fa-cloud-showers-heavy", label: "Hujan Sedang/Lebat", color: "text-blue-600", severe: true, type: 'rainy', advice: "Gunakan payung & jas hujan. Berhati-hati saat melangkah di area stasiun." },
+            95: { day: "fa-bolt", label: "Badai Petir", color: "text-yellow-600", severe: true, type: 'storm', advice: "Segera berlindung di dalam gedung stasiun. Hindari area terbuka." }
         };
 
         function getWindDirection(deg) {
@@ -148,16 +162,10 @@
             return arr[(Math.round(deg / 45) % 8)];
         }
 
-        // Fungsi Update Waktu dan Tanggal
         function updateDateTime() {
             const now = new Date();
-            
-            // Jam
             document.getElementById('digital-clock').innerText = now.toLocaleTimeString('id-ID', {hour12:false}).replace(/\./g, ':');
-            
-            // Hari & Tanggal
-            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-            document.getElementById('full-date').innerText = now.toLocaleDateString('id-ID', options);
+            document.getElementById('full-date').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
         }
         setInterval(updateDateTime, 1000);
 
@@ -165,16 +173,11 @@
             try {
                 const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m&hourly=temperature_2m,weather_code&timezone=auto&models=best_match`);
                 const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=id`);
-                
                 const data = await weatherRes.json();
                 const geo = await geoRes.json();
-
                 const addr = geo.address;
-                const cityName = addr.city || addr.town || addr.city_district || addr.county || "Kota";
-                
-                document.getElementById('city-name').innerText = cityName;
+                document.getElementById('city-name').innerText = addr.city || addr.town || addr.city_district || "Kota";
                 document.getElementById('kelurahan-name').innerText = `Kel./Wil. ${addr.village || addr.suburb || addr.neighbourhood || "Area Stasiun"}`;
-                
                 renderUI(data);
             } catch (e) { console.error(e); }
         }
@@ -188,9 +191,7 @@
 
             const info = weatherMap[current.weather_code] || weatherMap[2];
             document.getElementById('weather-desc-main').innerText = info.label;
-            
-            const mainIcon = document.getElementById('main-icon');
-            mainIcon.className = `fas ${info.day} weather-icon-giant ${info.color}`;
+            document.getElementById('main-icon').className = `fas ${info.day} weather-icon-giant ${info.color}`;
             
             setAtmosphere(info.type);
 
@@ -219,13 +220,28 @@
 
             document.getElementById('hourly-list').innerHTML = hourlyHTML.repeat(4);
             
-            const alertBox = document.getElementById('weather-alert');
+            // LOGIKA DUAL MODE ALERT
+            const alertBox = document.getElementById('alert-box');
+            const alertTypeLabel = document.getElementById('alert-type-label');
+            const alertIcon = document.getElementById('alert-icon');
+
             if(badWeather) {
-                alertBox.classList.remove('hidden');
+                // Mode Cuaca Buruk (Merah)
+                alertBox.className = "alert-box alert-danger";
+                alertIcon.className = "fas fa-triangle-exclamation text-white text-sm";
+                alertTypeLabel.innerText = "Peringatan Cuaca";
                 document.getElementById('alert-title').innerText = `WASPADA ${badWeather.info.label}`;
-                document.getElementById('alert-subtitle').innerText = `Pukul ${badWeather.jam}.00 WIB kondisi diprediksi memburuk.`;
+                document.getElementById('alert-subtitle').innerText = `Diprediksi terjadi pukul ${badWeather.jam}.00 WIB.`;
                 document.getElementById('alert-instruction').innerText = `HIMBAUAN: ${badWeather.info.advice}`;
-            } else { alertBox.classList.add('hidden'); }
+            } else {
+                // Mode Aman / Himbauan Standar (Hijau)
+                alertBox.className = "alert-box alert-info";
+                alertIcon.className = "fas fa-shield-heart text-white text-sm";
+                alertTypeLabel.innerText = "Himbauan Keamanan";
+                document.getElementById('alert-title').innerText = "Perjalanan Aman";
+                document.getElementById('alert-subtitle').innerText = "Jagalah barang bawaan pribadi Anda agar tidak tertinggal.";
+                document.getElementById('alert-instruction').innerText = "HIMBAUAN: Tetap patuhi peraturan saat naik atau turun kereta api.";
+            }
         }
 
         function setAtmosphere(type) {
