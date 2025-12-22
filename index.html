@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KAI Weather - Interactive Focus</title>
+    <title>KAI Weather - Adaptive City Name</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -25,7 +25,17 @@
             z-index: 10; position: relative; overflow: hidden;
         }
 
-        /* Weather Atmosphere Overlays */
+        /* Adaptive City Font */
+        .city-text {
+            font-size: 1.25rem; /* Ukuran dasar diperkecil sedikit dari 2xl */
+            line-height: 1.1;
+            word-wrap: break-word;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* Maksimal 2 baris */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
         #weather-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
         .rain-drop { position: absolute; background: rgba(0, 51, 102, 0.4); width: 2px; height: 12px; top: -20px; animation: fall linear infinite; }
         @keyframes fall { to { transform: translateY(300px); } }
@@ -34,9 +44,8 @@
         .flash-active { animation: lightning-anim 5s infinite; }
         @keyframes lightning-anim { 0%, 90%, 100% { opacity: 0; } 92% { opacity: 1; } 93% { opacity: 0; } 95% { opacity: 1; } }
 
-        /* Interactive Weather Icon Animations */
         .weather-icon-giant {
-            font-size: 5rem; /* Ukuran diperbesar */
+            font-size: 5rem;
             filter: drop-shadow(0 10px 8px rgba(0,0,0,0.1));
             animation: float-and-pulse 4s ease-in-out infinite;
             display: inline-block;
@@ -49,7 +58,6 @@
 
         .font-header { font-family: 'Montserrat', sans-serif; }
 
-        /* Scrolling Area */
         .scroll-wrapper { position: relative; flex: 1; overflow: hidden; mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); }
         .scroll-content { display: flex; flex-direction: column; gap: 0.5rem; animation: scroll-up 45s linear infinite; }
         @keyframes scroll-up { from { transform: translateY(0); } to { transform: translateY(-50%); } }
@@ -72,11 +80,11 @@
             <div id="lightning" class="lightning-flash"></div>
             
             <div class="relative z-10">
-                <div class="flex items-center gap-3 mb-4">
-                    <i class="fas fa-location-dot text-orange-600 text-2xl"></i>
-                    <div class="flex flex-col">
-                        <h1 id="city-name" class="text-2xl font-black font-header uppercase tracking-tight text-slate-800 leading-none">Memuat Kota...</h1>
-                        <h2 id="kelurahan-name" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Mencari Kelurahan...</h2>
+                <div class="flex items-start gap-3 mb-4">
+                    <i class="fas fa-location-dot text-orange-600 text-xl mt-1"></i>
+                    <div class="flex flex-col flex-1">
+                        <h1 id="city-name" class="font-black font-header uppercase tracking-tight text-slate-800 city-text">Memuat Kota...</h1>
+                        <h2 id="kelurahan-name" class="text-[9px] font-bold uppercase tracking-widest text-slate-400 mt-1">Mencari Kelurahan...</h2>
                     </div>
                 </div>
                 
@@ -96,7 +104,7 @@
 
                 <div class="grid grid-cols-3 gap-2 pt-5 border-t border-slate-100 text-center">
                     <div>
-                        <p class="text-[9px] uppercase font-bold text-slate-400">Kelembaban</p>
+                        <p class="text-[9px] uppercase font-bold text-slate-400">Lembab</p>
                         <p id="humidity-val" class="text-sm font-black text-slate-800 font-header">--%</p>
                     </div>
                     <div class="border-x border-slate-100">
@@ -107,9 +115,6 @@
                         <p class="text-[9px] uppercase font-bold text-slate-400">Arah Angin</p>
                         <p id="wind-dir-val" class="text-sm font-black text-slate-800 font-header">--</p>
                     </div>
-                </div>
-                <div class="text-center mt-3">
-                    <span id="feels-like" class="text-[10px] font-bold text-slate-400 italic"></span>
                 </div>
             </div>
         </div>
@@ -124,7 +129,7 @@
             <div class="alert-kai-v2">
                 <div class="flex items-center gap-2 border-b border-white/20 pb-2 mb-2">
                     <i class="fas fa-shield-halved text-white text-sm"></i>
-                    <h4 class="text-[10px] font-black uppercase text-white tracking-[0.2em]">Pusat Informasi Cuaca</h4>
+                    <h4 class="text-[10px] font-black uppercase text-white tracking-[0.2em]">Informasi Keamanan</h4>
                 </div>
                 <h5 id="alert-title" class="text-lg font-black font-header leading-tight uppercase text-white"></h5>
                 <p id="alert-subtitle" class="text-[11px] font-medium text-white mt-1"></p>
@@ -140,8 +145,8 @@
             2: { day: "fa-cloud-sun", label: "Berawan", color: "text-slate-400", type: 'cloudy' },
             3: { day: "fa-cloud", label: "Berawan Tebal", color: "text-slate-500", type: 'cloudy' },
             61: { day: "fa-cloud-rain", label: "Hujan Ringan", color: "text-blue-400", type: 'rainy' },
-            63: { day: "fa-cloud-showers-heavy", label: "Hujan Sedang/Lebat", color: "text-blue-600", severe: true, type: 'rainy', advice: "Gunakan payung. Waspada lantai peron licin." },
-            95: { day: "fa-bolt", label: "Badai Petir", color: "text-yellow-600", severe: true, type: 'storm', advice: "Segera masuk gedung stasiun. Hindari benda logam." }
+            63: { day: "fa-cloud-showers-heavy", label: "Hujan Sedang/Lebat", color: "text-blue-600", severe: true, type: 'rainy', advice: "Gunakan payung & jas hujan. Berhati-hati saat melangkah." },
+            95: { day: "fa-bolt", label: "Badai Petir", color: "text-yellow-600", severe: true, type: 'storm', advice: "Segera berlindung di dalam stasiun." }
         };
 
         function getWindDirection(deg) {
@@ -158,7 +163,9 @@
                 const geo = await geoRes.json();
 
                 const addr = geo.address;
-                document.getElementById('city-name').innerText = addr.city || addr.town || addr.city_district || "Kota";
+                const cityName = addr.city || addr.town || addr.city_district || addr.county || "Kota";
+                
+                document.getElementById('city-name').innerText = cityName;
                 document.getElementById('kelurahan-name').innerText = `Kel./Wil. ${addr.village || addr.suburb || addr.neighbourhood || "Area Stasiun"}`;
                 
                 renderUI(data);
@@ -168,7 +175,6 @@
         function renderUI(data) {
             const current = data.current;
             document.getElementById('current-temp').innerText = `${Math.round(current.temperature_2m)}°`;
-            document.getElementById('feels-like').innerText = `Sensasi suhu di stasiun saat ini: ${Math.round(current.apparent_temperature)}°C`;
             document.getElementById('humidity-val').innerText = `${current.relative_humidity_2m}%`;
             document.getElementById('wind-val').innerText = `${Math.round(current.wind_speed_10m)} km/j`;
             document.getElementById('wind-dir-val').innerText = getWindDirection(current.wind_direction_10m);
@@ -209,9 +215,9 @@
             const alertBox = document.getElementById('weather-alert');
             if(badWeather) {
                 alertBox.classList.remove('hidden');
-                document.getElementById('alert-title').innerText = `Peringatan: ${badWeather.info.label}`;
-                document.getElementById('alert-subtitle').innerText = `Pukul ${badWeather.jam}.00 WIB diperkirakan terjadi cuaca buruk.`;
-                document.getElementById('alert-instruction').innerText = `Pesan: ${badWeather.info.advice}`;
+                document.getElementById('alert-title').innerText = `WASPADA ${badWeather.info.label}`;
+                document.getElementById('alert-subtitle').innerText = `Pukul ${badWeather.jam}.00 WIB kondisi diprediksi memburuk.`;
+                document.getElementById('alert-instruction').innerText = `HIMBAUAN: ${badWeather.info.advice}`;
             } else { alertBox.classList.add('hidden'); }
         }
 
