@@ -120,7 +120,7 @@
             </div>
         </div>
 
-        <h3 class="text-[10px] font-bold text-white/50 uppercase px-2 mb-2 tracking-[0.2em]"><i class="fas fa-hourglass-half mr-1"></i> Prakiraan Cuaca Real-Time</h3>
+        <h3 class="text-[10px] font-bold text-white/50 uppercase px-2 mb-2 tracking-[0.2em]"><i class="fas fa-hourglass-half mr-1"></i> Prakiraan Cuaca </h3>
         
         <div style="position: relative; flex: 1; overflow: hidden; mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);">
             <div id="hourly-list" class="scroll-content"></div>
@@ -130,7 +130,7 @@
             <div id="alert-box" class="alert-box alert-info text-white">
                 <div class="flex items-center gap-2 border-b border-white/20 pb-2 mb-2">
                     <i id="alert-icon" class="fas fa-circle-info text-white text-xs"></i>
-                    <h4 id="alert-type-label" class="text-[9px] font-black uppercase text-white tracking-[0.2em]">Info Perjalanan</h4>
+                    <h4 id="alert-type-label" class="text-[9px] font-black uppercase text-white tracking-[0.2em]">Peringatan Cuaca Buruk</h4>
                 </div>
                 <h5 id="alert-title" class="text-base font-black uppercase leading-tight" style="font-family: 'Montserrat';">Memuat Himbauan...</h5>
                 <p id="alert-subtitle" class="text-[10px] font-medium mt-0.5"></p>
@@ -149,8 +149,8 @@
             2: { day: "fa-cloud-sun", label: "Berawan", color: "text-slate-400", type: 'cloudy' },
             3: { day: "fa-cloud", label: "Berawan Tebal", color: "text-slate-500", type: 'cloudy' },
             61: { day: "fa-cloud-rain", label: "Hujan Ringan", color: "text-blue-400", type: 'rainy' },
-            63: { day: "fa-cloud-showers-heavy", label: "Hujan Sedang/Lebat", color: "text-blue-600", severe: true, type: 'rainy', advice: "Gunakan payung. Waspada lantai peron licin." },
-            95: { day: "fa-bolt", label: "Badai Petir", color: "text-yellow-600", severe: true, type: 'storm', advice: "Segera masuk ke gedung stasiun." }
+            63: { day: "fa-cloud-showers-heavy", label: "Hujan Sedang/Lebat", color: "text-blue-600", severe: true, type: 'rainy', advice: "Gunakan payung & Waspada Jalan Licin." },
+            95: { day: "fa-bolt", label: "Badai Petir", color: "text-yellow-600", severe: true, type: 'storm', advice: "Gunakan Pelindung Hujan & Segera Menuju Tempat Aman" }
         };
 
         function updateDateTime() {
@@ -287,6 +287,7 @@
     </script>
 </body>
 </html>
+
 
 
 
