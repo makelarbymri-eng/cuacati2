@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KAI Weather - BMKG Auto Sync</title>
+    <title>KAI Weather - Auto Sync System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -120,7 +120,7 @@
             </div>
         </div>
 
-        <h3 class="text-[10px] font-bold text-white/50 uppercase px-2 mb-2 tracking-[0.2em]"><i class="fas fa-hourglass-half mr-1"></i> Prakiraan BMKG </h3>
+        <h3 class="text-[10px] font-bold text-white/50 uppercase px-2 mb-2 tracking-[0.2em]"><i class="fas fa-hourglass-half mr-1"></i> Prakiraan Cuaca </h3>
         
         <div style="position: relative; flex: 1; overflow: hidden; mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);">
             <div id="hourly-list" class="scroll-content"></div>
@@ -130,9 +130,9 @@
             <div id="alert-box" class="alert-box alert-info text-white">
                 <div class="flex items-center gap-2 border-b border-white/20 pb-2 mb-2">
                     <i id="alert-icon" class="fas fa-circle-info text-white text-xs"></i>
-                    <h4 id="alert-type-label" class="text-[9px] font-black uppercase text-white tracking-[0.2em]">Himbauan Keselamatan</h4>
+                    <h4 id="alert-type-label" class="text-[9px] font-black uppercase text-white tracking-[0.2em]">Peringatan Cuaca Buruk</h4>
                 </div>
-                <h5 id="alert-title" class="text-base font-black uppercase leading-tight" style="font-family: 'Montserrat';">Memuat Data...</h5>
+                <h5 id="alert-title" class="text-base font-black uppercase leading-tight" style="font-family: 'Montserrat';">Memuat Himbauan...</h5>
                 <p id="alert-subtitle" class="text-[10px] font-medium mt-0.5"></p>
                 <p id="alert-instruction" class="text-[9px] font-bold italic text-yellow-300 mt-1 uppercase"></p>
             </div>
@@ -143,19 +143,14 @@
         let lastLat = null;
         let lastLon = null;
 
-        // Pemetaan Kode Cuaca BMKG ke UI
         const weatherMap = {
             0: { day: "fa-sun", label: "Cerah", color: "text-orange-400", type: 'sunny' },
             1: { day: "fa-cloud-sun", label: "Cerah Berawan", color: "text-orange-300", type: 'cloudy' },
-            2: { day: "fa-cloud-sun", label: "Cerah Berawan", color: "text-orange-300", type: 'cloudy' },
-            3: { day: "fa-cloud", label: "Berawan", color: "text-slate-400", type: 'cloudy' },
-            4: { day: "fa-cloud", label: "Berawan Tebal", color: "text-slate-500", type: 'cloudy' },
-            5: { day: "fa-smog", label: "Udara Kabur", color: "text-slate-300", type: 'cloudy' },
-            60: { day: "fa-cloud-rain", label: "Hujan Ringan", color: "text-blue-400", type: 'rainy' },
-            61: { day: "fa-cloud-rain", label: "Hujan Sedang", color: "text-blue-500", type: 'rainy' },
-            63: { day: "fa-cloud-showers-heavy", label: "Hujan Lebat", color: "text-blue-600", severe: true, type: 'rainy', advice: "Gunakan payung & Waspada Jalan Licin." },
-            95: { day: "fa-bolt", label: "Hujan Petir", color: "text-yellow-600", severe: true, type: 'storm', advice: "Gunakan Pelindung Hujan & Segera Menuju Tempat Aman" },
-            97: { day: "fa-bolt", label: "Hujan Petir", color: "text-yellow-600", severe: true, type: 'storm', advice: "Gunakan Pelindung Hujan & Segera Menuju Tempat Aman" }
+            2: { day: "fa-cloud-sun", label: "Berawan", color: "text-slate-400", type: 'cloudy' },
+            3: { day: "fa-cloud", label: "Berawan Tebal", color: "text-slate-500", type: 'cloudy' },
+            61: { day: "fa-cloud-rain", label: "Hujan Ringan", color: "text-blue-400", type: 'rainy' },
+            63: { day: "fa-cloud-showers-heavy", label: "Hujan Sedang/Lebat", color: "text-blue-600", severe: true, type: 'rainy', advice: "Gunakan payung & Waspada Jalan Licin." },
+            95: { day: "fa-bolt", label: "Badai Petir", color: "text-yellow-600", severe: true, type: 'storm', advice: "Gunakan Pelindung Hujan & Segera Menuju Tempat Aman" }
         };
 
         function updateDateTime() {
@@ -165,89 +160,79 @@
         }
         setInterval(updateDateTime, 1000);
 
+        // FUNGSI UTAMA UNTUK UPDATE DATA
         async function updateWeatherInfo(lat, lon) {
             try {
-                document.getElementById('sync-status').innerText = "Status: Sinkronisasi BMKG...";
+                document.getElementById('sync-status').innerText = "Status: Menyinkronkan...";
                 document.getElementById('main-card').style.opacity = "0.7";
 
-                // 1. Identifikasi Nama Kota/Kabupaten melalui Nominatim
-                const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=id`);
-                const geo = await geoRes.json();
-                const kabKota = geo.address.city || geo.address.town || geo.address.city_district || "Jakarta Pusat";
-                const cleanKabKota = kabKota.replace(/Kota /g, "").replace(/Kabupaten /g, "");
+                const [weatherRes, geoRes] = await Promise.all([
+                    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m&hourly=temperature_2m,weather_code&timezone=auto`),
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=id`)
+                ]);
 
-                // 2. Ambil List Wilayah BMKG
-                const listWilayahRes = await fetch('https://ibnux.github.io/BMKG-importer/cuaca/wilayah.json');
-                const wilayahData = await listWilayahRes.json();
-                
-                // Cari ID Wilayah BMKG yang paling relevan
-                const targetWilayah = wilayahData.find(w => w.kota.toLowerCase().includes(cleanKabKota.toLowerCase())) || wilayahData[0];
-
-                // 3. Ambil Detail Cuaca dari ID Wilayah BMKG
-                const weatherRes = await fetch(`https://ibnux.github.io/BMKG-importer/cuaca/${targetWilayah.id}.json`);
                 const data = await weatherRes.json();
+                const geo = await geoRes.json();
                 
-                // Update Lokasi di UI
-                document.getElementById('city-name').innerText = targetWilayah.kota;
-                document.getElementById('kelurahan-name').innerText = `Sekitar ${targetWilayah.kecamatan} (${targetWilayah.propinsi})`;
+                // Update Lokasi
+                const addr = geo.address;
+                document.getElementById('city-name').innerText = addr.city || addr.town || addr.city_district || addr.county || "Area Perjalanan";
+                document.getElementById('kelurahan-name').innerText = `Sekitar Wil. ${addr.village || addr.suburb || addr.neighbourhood || "Stasiun"}`;
 
-                // Data Cuaca Saat Ini (Index 0)
-                const cur = data[0];
-                document.getElementById('current-temp').innerText = `${cur.tempC}°`;
-                document.getElementById('humidity-val').innerText = `${cur.humidity}%`;
-                document.getElementById('wind-val').innerText = `${cur.kecepatanAngin} km/j`;
-                document.getElementById('wind-dir-val').innerText = cur.arahAngin;
+                // Update Cuaca Utama
+                const cur = data.current;
+                document.getElementById('current-temp').innerText = `${Math.round(cur.temperature_2m)}°`;
+                document.getElementById('humidity-val').innerText = `${cur.relative_humidity_2m}%`;
+                document.getElementById('wind-val').innerText = `${Math.round(cur.wind_speed_10m)} km/j`;
+                
+                const dirArr = ["Utara", "Timur Laut", "Timur", "Tenggara", "Selatan", "Barat Daya", "Barat", "Barat Laut"];
+                document.getElementById('wind-dir-val').innerText = dirArr[(Math.round(cur.wind_direction_10m / 45) % 8)];
 
-                const info = weatherMap[cur.kodeCuaca] || weatherMap[3];
+                const info = weatherMap[cur.weather_code] || weatherMap[2];
                 document.getElementById('weather-desc-main').innerText = info.label;
                 document.getElementById('main-icon').className = `fas ${info.day} weather-icon-giant ${info.color}`;
                 
                 setAtmosphere(info.type);
 
-                // Update Prakiraan Per 6 Jam (Data BMKG)
+                // Update Hourly
                 let hourlyHTML = '';
                 let badWeather = null;
-                
-                data.slice(1, 10).forEach((item) => {
-                    const timeStr = item.jamCuaca.split(' ')[1].substring(0, 5);
-                    const hInfo = weatherMap[item.kodeCuaca] || weatherMap[3];
-                    
-                    if(hInfo.severe && !badWeather) {
-                        badWeather = { jam: timeStr, info: hInfo };
+                const now = new Date();
+                data.hourly.time.forEach((t, i) => {
+                    const time = new Date(t);
+                    if(time > now && time.getDate() === now.getDate()) {
+                        const hInfo = weatherMap[data.hourly.weather_code[i]] || weatherMap[2];
+                        if(hInfo.severe && !badWeather) badWeather = { jam: time.getHours(), info: hInfo };
+                        hourlyHTML += `<div class="hourly-item">
+                            <span class="text-xs font-bold text-orange-500 w-10">${time.getHours().toString().padStart(2,'0')}.00</span>
+                            <div class="flex flex-1 items-center gap-2">
+                                <i class="fas ${hInfo.day} ${hInfo.color} text-sm"></i>
+                                <span class="text-[11px] font-semibold text-white/90">${hInfo.label}</span>
+                            </div>
+                            <span class="font-bold text-sm text-white">${Math.round(data.hourly.temperature_2m[i])}°</span>
+                        </div>`;
                     }
-
-                    hourlyHTML += `<div class="hourly-item">
-                        <span class="text-xs font-bold text-orange-500 w-10">${timeStr}</span>
-                        <div class="flex flex-1 items-center gap-2">
-                            <i class="fas ${hInfo.day} ${hInfo.color} text-sm"></i>
-                            <span class="text-[11px] font-semibold text-white/90">${hInfo.label}</span>
-                        </div>
-                        <span class="font-bold text-sm text-white">${item.tempC}°</span>
-                    </div>`;
                 });
-                
-                // Animasi scroll loop
-                document.getElementById('hourly-list').innerHTML = hourlyHTML.repeat(3);
+                document.getElementById('hourly-list').innerHTML = hourlyHTML.repeat(4);
 
-                // Update Panel Peringatan (Alert)
+                // Update Alert
                 const alertBox = document.getElementById('alert-box');
                 if(badWeather) {
                     alertBox.className = "alert-box alert-danger text-white";
-                    document.getElementById('alert-title').innerText = `WASPADA ${badWeather.info.label.toUpperCase()}`;
-                    document.getElementById('alert-subtitle').innerText = `Diprediksi terjadi sekitar pukul ${badWeather.jam} WIB.`;
+                    document.getElementById('alert-title').innerText = `WASPADA ${badWeather.info.label}`;
+                    document.getElementById('alert-subtitle').innerText = `Pukul ${badWeather.jam}.00 WIB kondisi cuaca memburuk.`;
                     document.getElementById('alert-instruction').innerText = `HIMBAUAN: ${badWeather.info.advice}`;
                 } else {
                     alertBox.className = "alert-box alert-info text-white";
-                    document.getElementById('alert-title').innerText = "KONDISI AMAN";
-                    document.getElementById('alert-subtitle').innerText = "Patuhi Prosedur Kerja & Jaga Jarak Aman.";
-                    document.getElementById('alert-instruction').innerText = "HIMBAUAN: Utamakan Keselamatan - Keluarga Menunggu di Rumah.";
+                    document.getElementById('alert-title').innerText = "Cuaca Normal";
+                    document.getElementById('alert-subtitle').innerText = "Patuhi Prosedur Kerja - Jaga Jarak Aman.";
+                    document.getElementById('alert-instruction').innerText = "HIMBAUAN: Utamakan Keselamatan - Ingat! Keluarga Menunggu Dirumah.";
                 }
 
                 document.getElementById('main-card').style.opacity = "1";
-                document.getElementById('sync-status').innerText = "Status: Terhubung (BMKG)";
+                document.getElementById('sync-status').innerText = "Status: Terhubung (Baru saja)";
             } catch (e) {
-                console.error(e);
-                document.getElementById('sync-status').innerText = "Status: Gangguan Koneksi BMKG";
+                document.getElementById('sync-status').innerText = "Status: Gangguan Koneksi";
             }
         }
 
@@ -265,30 +250,35 @@
             }
         }
 
+        // FUNGSI GEO-WATCHER (MEMANTAU PERGERAKAN)
         function initLocationWatch() {
             if (navigator.geolocation) {
+                // Ambil lokasi saat ini
                 navigator.geolocation.getCurrentPosition(pos => {
                     lastLat = pos.coords.latitude;
                     lastLon = pos.coords.longitude;
                     updateWeatherInfo(lastLat, lastLon);
-                }, () => {
-                    updateWeatherInfo(-6.2, 106.8); // Default Jakarta
                 });
 
+                // Pantau perubahan lokasi (jika user bergerak jauh)
                 navigator.geolocation.watchPosition(pos => {
                     const lat = pos.coords.latitude;
                     const lon = pos.coords.longitude;
-                    if (Math.abs(lat - (lastLat || 0)) > 0.01 || Math.abs(lon - (lastLon || 0)) > 0.01) {
-                        lastLat = lat; lastLon = lon;
+                    
+                    // Hanya refresh jika koordinat berubah cukup jauh (sekitar 500m - 1km)
+                    // agar tidak boros baterai & API
+                    if (Math.abs(lat - lastLat) > 0.005 || Math.abs(lon - lastLon) > 0.005) {
+                        lastLat = lat;
+                        lastLon = lon;
                         updateWeatherInfo(lat, lon);
                     }
                 });
             } else {
-                updateWeatherInfo(-6.2, 106.8);
+                updateWeatherInfo(-6.2, 106.8); // Default Jakarta jika GPS mati
             }
         }
 
-        // Auto Refresh per 15 Menit
+        // Interval Refresh Otomatis (Setiap 15 Menit)
         setInterval(() => {
             if (lastLat && lastLon) updateWeatherInfo(lastLat, lastLon);
         }, 15 * 60 * 1000);
@@ -297,3 +287,8 @@
     </script>
 </body>
 </html>
+
+
+
+
+
