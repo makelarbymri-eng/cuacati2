@@ -8,26 +8,62 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --kai-blue: #003366; --kai-orange: #FF6600; --kai-red: #d32f2f; --kai-green: #2e7d32; }
+        :root { 
+            --kai-blue: #003366; 
+            --kai-orange: #FF6600; 
+            --kai-red: #d32f2f;
+            --kai-green: #2e7d32;
+        }
         body { background: #003366; min-height: 100vh; display: flex; justify-content: center; align-items: center; font-family: 'Inter', sans-serif; margin: 0; color: white; }
-        .app-container { width: 100%; max-width: 420px; height: 95vh; background: var(--kai-blue); display: flex; flex-direction: column; padding: 1.25rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); position: relative; overflow: hidden; }
-        .kai-main-card { background: white; border-top: 6px solid var(--kai-orange); border-radius: 1.25rem; padding: 1.25rem; color: var(--kai-blue); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); margin-bottom: 1rem; z-index: 10; position: relative; transition: opacity 0.5s ease; }
-        .city-text { font-size: 1.15rem; line-height: 1.2; font-weight: 900; text-transform: uppercase; color: var(--kai-blue); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        .app-container {
+            width: 100%; max-width: 420px; height: 95vh; background: var(--kai-blue);
+            display: flex; flex-direction: column; padding: 1.25rem;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1);
+            position: relative; overflow: hidden;
+        }
+
+        .kai-main-card {
+            background: white; border-top: 6px solid var(--kai-orange);
+            border-radius: 1.25rem; padding: 1.25rem; color: var(--kai-blue);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); margin-bottom: 1rem;
+            z-index: 10; position: relative; transition: opacity 0.5s ease;
+        }
+
+        .city-text {
+            font-size: 1.15rem; line-height: 1.2; font-weight: 900; text-transform: uppercase;
+            color: var(--kai-blue); display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+        }
+
         #weather-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
         .rain-drop { position: absolute; background: rgba(0, 51, 102, 0.4); width: 2px; height: 12px; top: -20px; animation: fall linear infinite; }
         @keyframes fall { to { transform: translateY(300px); } }
+        
         .lightning-flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 3; pointer-events: none; }
         .flash-active { animation: lightning-anim 5s infinite; }
         @keyframes lightning-anim { 0%, 90%, 100% { opacity: 0; } 92% { opacity: 1; } 93% { opacity: 0; } 95% { opacity: 1; } }
-        .weather-icon-giant { font-size: 4.5rem; filter: drop-shadow(0 10px 8px rgba(0,0,0,0.1)); animation: float-and-pulse 4s ease-in-out infinite; display: inline-block; }
-        @keyframes float-and-pulse { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-10px) scale(1.05); } }
+
+        .weather-icon-giant {
+            font-size: 4.5rem; filter: drop-shadow(0 10px 8px rgba(0,0,0,0.1));
+            animation: float-and-pulse 4s ease-in-out infinite; display: inline-block;
+        }
+
+        @keyframes float-and-pulse {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.05); }
+        }
+
         .scroll-content { display: flex; flex-direction: column; gap: 0.5rem; animation: scroll-up 45s linear infinite; }
         @keyframes scroll-up { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+
         .hourly-item { display: flex; align-items: center; gap: 1rem; padding: 0.85rem; background: rgba(255, 255, 255, 0.08); border-radius: 0.75rem; }
+
         .alert-box { border-left: 8px solid var(--kai-orange); border-radius: 1.25rem; padding: 0.85rem 1rem; }
         .alert-danger { background: var(--kai-red); animation: alert-pulse 2s infinite; }
         .alert-info { background: var(--kai-green); }
         @keyframes alert-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+
         .sync-indicator { font-size: 8px; font-weight: bold; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-top: 4px; }
     </style>
 </head>
@@ -68,14 +104,24 @@
                 </div>
 
                 <div class="grid grid-cols-3 gap-1 pt-4 border-t border-slate-100 text-center">
-                    <div><p class="text-[8px] uppercase font-bold text-slate-400">Kelembaban</p><p id="humidity-val" class="text-xs font-black text-slate-800">--%</p></div>
-                    <div class="border-x border-slate-100"><p class="text-[8px] uppercase font-bold text-slate-400">Angin</p><p id="wind-val" class="text-xs font-black text-slate-800">--</p></div>
-                    <div><p class="text-[8px] uppercase font-bold text-slate-400">Arah</p><p id="wind-dir-val" class="text-xs font-black text-slate-800">--</p></div>
+                    <div>
+                        <p class="text-[8px] uppercase font-bold text-slate-400">Kelembaban</p>
+                        <p id="humidity-val" class="text-xs font-black text-slate-800">--%</p>
+                    </div>
+                    <div class="border-x border-slate-100">
+                        <p class="text-[8px] uppercase font-bold text-slate-400">Angin</p>
+                        <p id="wind-val" class="text-xs font-black text-slate-800">--</p>
+                    </div>
+                    <div>
+                        <p class="text-[8px] uppercase font-bold text-slate-400">Arah</p>
+                        <p id="wind-dir-val" class="text-xs font-black text-slate-800">--</p>
+                    </div>
                 </div>
             </div>
         </div>
 
         <h3 class="text-[10px] font-bold text-white/50 uppercase px-2 mb-2 tracking-[0.2em]"><i class="fas fa-hourglass-half mr-1"></i> Prakiraan Cuaca </h3>
+        
         <div style="position: relative; flex: 1; overflow: hidden; mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);">
             <div id="hourly-list" class="scroll-content"></div>
         </div>
@@ -97,21 +143,20 @@
         let lastLat = null;
         let lastLon = null;
 
-        // PERBAIKAN 1: Menambah mapping kode WMO yang lebih lengkap untuk deteksi hujan
+        // Pemetaan lengkap untuk semua kode WMO Open-Meteo
         const weatherMap = {
             0: { day: "fa-sun", label: "Cerah", color: "text-orange-400", type: 'sunny' },
             1: { day: "fa-cloud-sun", label: "Cerah Berawan", color: "text-orange-300", type: 'cloudy' },
-            2: { day: "fa-cloud-sun", label: "Berawan", color: "text-slate-400", type: 'cloudy' },
+            2: { day: "fa-cloud", label: "Berawan", color: "text-slate-400", type: 'cloudy' },
             3: { day: "fa-cloud", label: "Berawan Tebal", color: "text-slate-500", type: 'cloudy' },
             45: { day: "fa-smog", label: "Berkabut", color: "text-slate-300", type: 'cloudy' },
-            // Kode Hujan & Gerimis
             51: { day: "fa-cloud-rain", label: "Gerimis Ringan", color: "text-blue-300", type: 'rainy' },
-            53: { day: "fa-cloud-rain", label: "Gerimis Sedang", color: "text-blue-400", type: 'rainy' },
+            53: { day: "fa-cloud-rain", label: "Gerimis", color: "text-blue-400", type: 'rainy' },
             55: { day: "fa-cloud-rain", label: "Gerimis Lebat", color: "text-blue-500", type: 'rainy' },
             61: { day: "fa-cloud-rain", label: "Hujan Ringan", color: "text-blue-400", type: 'rainy' },
             63: { day: "fa-cloud-showers-heavy", label: "Hujan Sedang", color: "text-blue-600", severe: true, type: 'rainy', advice: "Gunakan payung & Waspada Jalan Licin." },
             65: { day: "fa-cloud-showers-heavy", label: "Hujan Lebat", color: "text-blue-800", severe: true, type: 'rainy', advice: "Waspada Genangan Air & Jarak Pandang Terbatas." },
-            80: { day: "fa-cloud-showers", label: "Hujan Lokal", color: "text-blue-400", type: 'rainy' },
+            80: { day: "fa-cloud-showers-heavy", label: "Hujan Lokal", color: "text-blue-400", type: 'rainy' },
             81: { day: "fa-cloud-showers-heavy", label: "Hujan Deras Lokal", color: "text-blue-600", severe: true, type: 'rainy' },
             95: { day: "fa-bolt", label: "Badai Petir", color: "text-yellow-600", severe: true, type: 'storm', advice: "Gunakan Pelindung Hujan & Segera Menuju Tempat Aman" }
         };
@@ -127,7 +172,7 @@
             try {
                 document.getElementById('sync-status').innerText = "Status: Menyinkronkan...";
                 
-                // PERBAIKAN 2: Menambah parameter 'precipitation' dan 'is_day' untuk akurasi tinggi
+                // Menambahkan precipitation untuk validasi curah hujan riil
                 const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,precipitation&hourly=temperature_2m,weather_code&timezone=auto`;
                 
                 const [weatherRes, geoRes] = await Promise.all([
@@ -139,8 +184,8 @@
                 const geo = await geoRes.json();
                 
                 const addr = geo.address;
-                document.getElementById('city-name').innerText = addr.city || addr.town || addr.city_district || "Area Perjalanan";
-                document.getElementById('kelurahan-name').innerText = `Sekitar Wil. ${addr.village || addr.suburb || addr.neighbourhood || "Stasiun"}`;
+                document.getElementById('city-name').innerText = addr.city || addr.town || addr.city_district || "Jakarta Utara";
+                document.getElementById('kelurahan-name').innerText = `Sekitar Wil. ${addr.village || addr.suburb || addr.neighbourhood || "Koja"}`;
 
                 const cur = data.current;
                 document.getElementById('current-temp').innerText = `${Math.round(cur.temperature_2m)}°`;
@@ -150,27 +195,39 @@
                 const dirArr = ["Utara", "Timur Laut", "Timur", "Tenggara", "Selatan", "Barat Daya", "Barat", "Barat Laut"];
                 document.getElementById('wind-dir-val').innerText = dirArr[(Math.round(cur.wind_direction_10m / 45) % 8)];
 
-                // PERBAIKAN 3: Logika Fallback - Jika API bilang Berawan tapi sensor deteksi Air (Precipitation > 0)
+                // LOGIKA FALLBACK: Jika API bilang berawan tapi ada curah hujan, set ke Hujan
                 let code = cur.weather_code;
-                if ((code <= 3) && cur.precipitation > 0) {
-                    code = 80; // Paksa jadi Hujan Lokal
+                if (code <= 3 && cur.precipitation > 0) {
+                    code = 80; 
                 }
 
+                // Ambil info dari map, jika tidak ada gunakan default Berawan (kode 2)
                 const info = weatherMap[code] || weatherMap[2];
+                
+                // UPDATE IKAN DAN TEXT (Ini bagian yang tadi hilang)
                 document.getElementById('weather-desc-main').innerText = info.label;
-                document.getElementById('main-icon').className = `fas ${info.day} weather-icon-giant ${info.color}`;
+                const iconElement = document.getElementById('main-icon');
+                iconElement.className = `fas ${info.day} weather-icon-giant ${info.color}`;
                 
                 setAtmosphere(info.type);
 
+                // Update Prakiraan Per Jam
                 let hourlyHTML = '';
                 let badWeather = null;
                 const now = new Date();
-                data.hourly.time.forEach((t, i) => {
-                    const time = new Date(t);
-                    if(time > now && time.getDate() === now.getDate()) {
-                        const hInfo = weatherMap[data.hourly.weather_code[i]] || weatherMap[2];
-                        if(hInfo.severe && !badWeather) badWeather = { jam: time.getHours(), info: hInfo };
-                        hourlyHTML += `<div class="hourly-item">
+                
+                // Ambil 12 data jam kedepan
+                for(let i=0; i<12; i++) {
+                    const time = new Date(data.hourly.time[i]);
+                    const hCode = data.hourly.weather_code[i];
+                    const hInfo = weatherMap[hCode] || weatherMap[2];
+                    
+                    if(hInfo.severe && !badWeather && time > now) {
+                        badWeather = { jam: time.getHours(), info: hInfo };
+                    }
+
+                    hourlyHTML += `
+                        <div class="hourly-item">
                             <span class="text-xs font-bold text-orange-500 w-10">${time.getHours().toString().padStart(2,'0')}.00</span>
                             <div class="flex flex-1 items-center gap-2">
                                 <i class="fas ${hInfo.day} ${hInfo.color} text-sm"></i>
@@ -178,17 +235,16 @@
                             </div>
                             <span class="font-bold text-sm text-white">${Math.round(data.hourly.temperature_2m[i])}°</span>
                         </div>`;
-                    }
-                });
-                document.getElementById('hourly-list').innerHTML = hourlyHTML; // Dihapus repeat(4) agar data riil
+                }
+                document.getElementById('hourly-list').innerHTML = hourlyHTML;
 
+                // Update Kotak Peringatan
                 const alertBox = document.getElementById('alert-box');
-                // PERBAIKAN 4: Menambah kondisi waspada jika saat ini sedang hujan lebat
-                if(badWeather || info.severe) {
-                    const activeAlert = info.severe ? {jam: 'Sekarang', info: info} : badWeather;
+                if(info.severe || (badWeather && badWeather.jam <= now.getHours() + 3)) {
+                    const activeAlert = info.severe ? {info: info, jam: 'Saat ini'} : badWeather;
                     alertBox.className = "alert-box alert-danger text-white";
-                    document.getElementById('alert-title').innerText = `WASPADA ${activeAlert.info.label}`;
-                    document.getElementById('alert-subtitle').innerText = `Kondisi cuaca memburuk (${activeAlert.jam}).`;
+                    document.getElementById('alert-title').innerText = `WASPADA ${activeAlert.info.label.toUpperCase()}`;
+                    document.getElementById('alert-subtitle').innerText = `Kondisi terpantau di lokasi Anda.`;
                     document.getElementById('alert-instruction').innerText = `HIMBAUAN: ${activeAlert.info.advice || "Utamakan Keselamatan"}`;
                 } else {
                     alertBox.className = "alert-box alert-info text-white";
@@ -199,7 +255,7 @@
 
                 document.getElementById('sync-status').innerText = "Status: Terhubung (Baru saja)";
             } catch (e) {
-                console.error(e);
+                console.error("Error update:", e);
                 document.getElementById('sync-status').innerText = "Status: Gangguan Koneksi";
             }
         }
@@ -207,11 +263,15 @@
         function setAtmosphere(type) {
             const overlay = document.getElementById('weather-overlay');
             const lightning = document.getElementById('lightning');
-            overlay.innerHTML = ''; lightning.classList.remove('flash-active');
+            overlay.innerHTML = ''; 
+            lightning.classList.remove('flash-active');
+            
             if (type === 'rainy' || type === 'storm') {
                 for(let i=0; i<30; i++) {
-                    const d = document.createElement('div'); d.className = 'rain-drop';
-                    d.style.left = Math.random()*100+'%'; d.style.animationDuration = (Math.random()*0.4+0.4)+'s';
+                    const d = document.createElement('div'); 
+                    d.className = 'rain-drop';
+                    d.style.left = Math.random()*100+'%'; 
+                    d.style.animationDuration = (Math.random()*0.4+0.4)+'s';
                     overlay.appendChild(d);
                 }
                 if(type === 'storm') lightning.classList.add('flash-active');
@@ -225,13 +285,14 @@
                     lastLon = pos.coords.longitude;
                     updateWeatherInfo(lastLat, lastLon);
                 }, err => {
-                    updateWeatherInfo(-6.12, 106.87); // Default Jakarta Utara (Koja) jika GPS ditolak
+                    // Fallback ke Jakarta Utara jika GPS ditolak
+                    updateWeatherInfo(-6.12, 106.88);
                 }, { enableHighAccuracy: true });
 
                 navigator.geolocation.watchPosition(pos => {
                     const lat = pos.coords.latitude;
                     const lon = pos.coords.longitude;
-                    if (Math.abs(lat - lastLat) > 0.005 || Math.abs(lon - lastLon) > 0.005) {
+                    if (lastLat && (Math.abs(lat - lastLat) > 0.005 || Math.abs(lon - lastLon) > 0.005)) {
                         lastLat = lat; lastLon = lon;
                         updateWeatherInfo(lat, lon);
                     }
@@ -239,11 +300,9 @@
             }
         }
 
-        setInterval(() => {
-            if (lastLat && lastLon) updateWeatherInfo(lastLat, lastLon);
-        }, 10 * 60 * 1000);
-
         initLocationWatch();
+        // Refresh tiap 10 menit
+        setInterval(() => { if(lastLat) updateWeatherInfo(lastLat, lastLon); }, 600000);
     </script>
 </body>
 </html>
