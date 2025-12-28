@@ -143,7 +143,6 @@
         let lastLat = null;
         let lastLon = null;
 
-        // Pemetaan lengkap untuk semua kode WMO Open-Meteo
         const weatherMap = {
             0: { day: "fa-sun", label: "Cerah", color: "text-orange-400", type: 'sunny' },
             1: { day: "fa-cloud-sun", label: "Cerah Berawan", color: "text-orange-300", type: 'cloudy' },
@@ -171,12 +170,8 @@
         async function updateWeatherInfo(lat, lon) {
             try {
                 document.getElementById('sync-status').innerText = "Status: Menyinkronkan...";
-                
-                // Menambahkan precipitation untuk validasi curah hujan riil
-                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,precipitation&hourly=temperature_2m,weather_code&timezone=auto`;
-                
                 const [weatherRes, geoRes] = await Promise.all([
-                    fetch(weatherUrl),
+                    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,precipitation&hourly=temperature_2m,weather_code&timezone=auto`),
                     fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=id`)
                 ]);
 
@@ -184,8 +179,8 @@
                 const geo = await geoRes.json();
                 
                 const addr = geo.address;
-                document.getElementById('city-name').innerText = addr.city || addr.town || addr.city_district || "Jakarta Utara";
-                document.getElementById('kelurahan-name').innerText = `Sekitar Wil. ${addr.village || addr.suburb || addr.neighbourhood || "Koja"}`;
+                document.getElementById('city-name').innerText = addr.city || addr.town || addr.city_district || "Jakarta";
+                document.getElementById('kelurahan-name').innerText = `Wil. ${addr.village || addr.suburb || addr.neighbourhood || "Stasiun"}`;
 
                 const cur = data.current;
                 document.getElementById('current-temp').innerText = `${Math.round(cur.temperature_2m)}°`;
@@ -195,36 +190,34 @@
                 const dirArr = ["Utara", "Timur Laut", "Timur", "Tenggara", "Selatan", "Barat Daya", "Barat", "Barat Laut"];
                 document.getElementById('wind-dir-val').innerText = dirArr[(Math.round(cur.wind_direction_10m / 45) % 8)];
 
-                // LOGIKA FALLBACK: Jika API bilang berawan tapi ada curah hujan, set ke Hujan
+                // Koreksi Hujan Lokal Berdasarkan Precipitation
                 let code = cur.weather_code;
-                if (code <= 3 && cur.precipitation > 0) {
-                    code = 80; 
-                }
+                if (code <= 3 && cur.precipitation > 0) code = 80;
 
-                // Ambil info dari map, jika tidak ada gunakan default Berawan (kode 2)
                 const info = weatherMap[code] || weatherMap[2];
-                
-                // UPDATE IKAN DAN TEXT (Ini bagian yang tadi hilang)
                 document.getElementById('weather-desc-main').innerText = info.label;
-                const iconElement = document.getElementById('main-icon');
-                iconElement.className = `fas ${info.day} weather-icon-giant ${info.color}`;
+                document.getElementById('main-icon').className = `fas ${info.day} weather-icon-giant ${info.color}`;
                 
                 setAtmosphere(info.type);
 
-                // Update Prakiraan Per Jam
+                // Update Prakiraan Per Jam (Hanya Jam Kedepan)
                 let hourlyHTML = '';
-                let badWeather = null;
+                let badWeatherFound = null;
                 const now = new Date();
-                
-                // Ambil 12 data jam kedepan
-                for(let i=0; i<12; i++) {
+
+                for (let i = 0; i < data.hourly.time.length; i++) {
                     const time = new Date(data.hourly.time[i]);
+                    
+                    // Filter: Hanya jam sekarang dan masa depan
+                    if (time.getHours() < now.getHours() && time.getDate() === now.getDate()) continue;
+                    
                     const hCode = data.hourly.weather_code[i];
                     const hInfo = weatherMap[hCode] || weatherMap[2];
                     
-                    if(hInfo.severe && !badWeather && time > now) {
-                        badWeather = { jam: time.getHours(), info: hInfo };
-                    }
+                    // Batasi 12 baris
+                    if (hourlyHTML.split('hourly-item').length > 12) break;
+
+                    if (hInfo.severe && !badWeatherFound) badWeatherFound = { jam: time.getHours(), info: hInfo };
 
                     hourlyHTML += `
                         <div class="hourly-item">
@@ -236,26 +229,25 @@
                             <span class="font-bold text-sm text-white">${Math.round(data.hourly.temperature_2m[i])}°</span>
                         </div>`;
                 }
-                document.getElementById('hourly-list').innerHTML = hourlyHTML;
+                // Tampilkan data dan tambahkan duplikasi untuk efek scrolling jika data mencukupi
+                document.getElementById('hourly-list').innerHTML = hourlyHTML + hourlyHTML;
 
-                // Update Kotak Peringatan
                 const alertBox = document.getElementById('alert-box');
-                if(info.severe || (badWeather && badWeather.jam <= now.getHours() + 3)) {
-                    const activeAlert = info.severe ? {info: info, jam: 'Saat ini'} : badWeather;
+                if (info.severe || badWeatherFound) {
+                    const alertData = info.severe ? info : badWeatherFound.info;
                     alertBox.className = "alert-box alert-danger text-white";
-                    document.getElementById('alert-title').innerText = `WASPADA ${activeAlert.info.label.toUpperCase()}`;
-                    document.getElementById('alert-subtitle').innerText = `Kondisi terpantau di lokasi Anda.`;
-                    document.getElementById('alert-instruction').innerText = `HIMBAUAN: ${activeAlert.info.advice || "Utamakan Keselamatan"}`;
+                    document.getElementById('alert-title').innerText = `WASPADA ${alertData.label.toUpperCase()}`;
+                    document.getElementById('alert-subtitle').innerText = info.severe ? "Kondisi cuaca sedang buruk di lokasi Anda." : `Prakiraan buruk pukul ${badWeatherFound.jam}.00 WIB.`;
+                    document.getElementById('alert-instruction').innerText = `HIMBAUAN: ${alertData.advice || "Utamakan Keselamatan."}`;
                 } else {
                     alertBox.className = "alert-box alert-info text-white";
                     document.getElementById('alert-title').innerText = "Cuaca Normal";
                     document.getElementById('alert-subtitle').innerText = "Patuhi Prosedur Kerja - Jaga Jarak Aman.";
-                    document.getElementById('alert-instruction').innerText = "HIMBAUAN: Utamakan Keselamatan - Ingat! Keluarga Menunggu Dirumah.";
+                    document.getElementById('alert-instruction').innerText = "HIMBAUAN: Utamakan Keselamatan Kerja.";
                 }
 
                 document.getElementById('sync-status').innerText = "Status: Terhubung (Baru saja)";
             } catch (e) {
-                console.error("Error update:", e);
                 document.getElementById('sync-status').innerText = "Status: Gangguan Koneksi";
             }
         }
@@ -263,15 +255,11 @@
         function setAtmosphere(type) {
             const overlay = document.getElementById('weather-overlay');
             const lightning = document.getElementById('lightning');
-            overlay.innerHTML = ''; 
-            lightning.classList.remove('flash-active');
-            
+            overlay.innerHTML = ''; lightning.classList.remove('flash-active');
             if (type === 'rainy' || type === 'storm') {
                 for(let i=0; i<30; i++) {
-                    const d = document.createElement('div'); 
-                    d.className = 'rain-drop';
-                    d.style.left = Math.random()*100+'%'; 
-                    d.style.animationDuration = (Math.random()*0.4+0.4)+'s';
+                    const d = document.createElement('div'); d.className = 'rain-drop';
+                    d.style.left = Math.random()*100+'%'; d.style.animationDuration = (Math.random()*0.4+0.4)+'s';
                     overlay.appendChild(d);
                 }
                 if(type === 'storm') lightning.classList.add('flash-active');
@@ -281,27 +269,21 @@
         function initLocationWatch() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(pos => {
-                    lastLat = pos.coords.latitude;
-                    lastLon = pos.coords.longitude;
+                    lastLat = pos.coords.latitude; lastLon = pos.coords.longitude;
                     updateWeatherInfo(lastLat, lastLon);
-                }, err => {
-                    // Fallback ke Jakarta Utara jika GPS ditolak
-                    updateWeatherInfo(-6.12, 106.88);
-                }, { enableHighAccuracy: true });
+                }, () => updateWeatherInfo(-6.12, 106.88), { enableHighAccuracy: true });
 
                 navigator.geolocation.watchPosition(pos => {
-                    const lat = pos.coords.latitude;
-                    const lon = pos.coords.longitude;
+                    const lat = pos.coords.latitude; const lon = pos.coords.longitude;
                     if (lastLat && (Math.abs(lat - lastLat) > 0.005 || Math.abs(lon - lastLon) > 0.005)) {
-                        lastLat = lat; lastLon = lon;
-                        updateWeatherInfo(lat, lon);
+                        lastLat = lat; lastLon = lon; updateWeatherInfo(lat, lon);
                     }
                 });
             }
         }
 
+        updateDateTime();
         initLocationWatch();
-        // Refresh tiap 10 menit
         setInterval(() => { if(lastLat) updateWeatherInfo(lastLat, lastLon); }, 600000);
     </script>
 </body>
